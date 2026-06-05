@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![ArabamRental](https://img.shields.io/badge/ASP.NET_MVC-5-blue?style=for-the-badge&logo=dotnet)
+![ASP.NET MVC](https://img.shields.io/badge/ASP.NET_MVC-5-blue?style=for-the-badge&logo=dotnet)
 ![SQLite](https://img.shields.io/badge/SQLite-3-green?style=for-the-badge&logo=sqlite)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5-purple?style=for-the-badge&logo=bootstrap)
 ![.NET Framework](https://img.shields.io/badge/.NET_Framework-4.8-orange?style=for-the-badge&logo=dotnet)
@@ -10,38 +10,6 @@
 **Modern ve şık tasarımlı ASP.NET MVC 5 araç kiralama uygulaması.**
 
 </div>
-
----
-
-## 📸 Ekran Görüntüleri
-
-### Ana Sayfa
-![Ana Sayfa](screenshots/home.png)
-> Etkileyici hero bölümü ve çağrı butonu ile kullanıcıları karşılayan ana sayfa.
-
-### Araç Listesi
-![Araç Listesi](screenshots/cars.png)
-> Vites, yakıt ve marka filtresiyle 24 araç arasında kolayca arama yapın.
-
-### Araç Detay
-![Araç Detay](screenshots/detail.png)
-> Her araç için teknik özellikler, görseller ve kullanıcı yorumları.
-
-### Kiralama Formu
-![Kiralama Formu](screenshots/rent.png)
-> Alış/teslim tarihi seçimi ve iletişim bilgileriyle hızlı kiralama akışı.
-
-### Kiralamalarım
-![Kiralamalarım](screenshots/rentals.png)
-> Kullanıcıların aktif ve geçmiş kiralamalarını yönettiği panel.
-
-### Admin Paneli
-![Admin Paneli](screenshots/admin.png)
-> Araç ekleme, düzenleme, silme ve kiralama geçmişi yönetimi.
-
-### Hakkımızda
-![Hakkımızda](screenshots/about.png)
-> Şirket hikayesi ve hizmet istatistikleri.
 
 ---
 
@@ -80,15 +48,12 @@
 ```bash
 # 1. Repoyu klonla
 git clone https://github.com/KULLANICI_ADINIZ/ArabamCarRental.git
-
-# 2. Visual Studio'da ArabamCarRental.sln dosyasını aç
-
-# 3. NuGet paketlerini geri yükle
-# Solution Explorer → Sağ tıkla → Restore NuGet Packages
-
-# 4. Projeyi çalıştır
-# F5 veya Ctrl+F5
 ```
+
+1. Visual Studio'da `ArabamCarRental.sln` dosyasını aç
+2. Solution Explorer'da projeye sağ tıkla → **Restore NuGet Packages**
+3. `Web.config` içinde admin şifresini güncelle (aşağıya bak)
+4. **F5** ile çalıştır
 
 > **Not:** İlk çalıştırmada `App_Data/ArabamCarRental.db` otomatik oluşturulur.
 
@@ -105,10 +70,7 @@ git clone https://github.com/KULLANICI_ADINIZ/ArabamCarRental.git
 
 > ⚠️ **Deploy öncesi mutlaka güncelleyin.**
 
-### Admin Paneline Erişim
-```
-URL: /Admin/Login
-```
+Admin paneline erişim: `/Admin/Login`
 
 ---
 
@@ -137,13 +99,13 @@ ArabamCarRental/
 
 ---
 
-## 🔒 Güvenlik Notları
+## 🔒 Güvenlik
 
 - Kullanıcı şifreleri **SHA-256** ile hashlenerek saklanır
-- Tüm form işlemleri **AntiForgeryToken** ile korunur
+- Tüm formlar **AntiForgeryToken** ile korunur
 - SQL injection'a karşı **parametreli sorgular** kullanılır
 - `App_Data/*.db` dosyaları `.gitignore` ile repoya dahil edilmez
-- `compilation debug="false"` ile hata detayları gizlenir
+- `debug="false"` ile hata detayları gizlenir
 
 ---
 
