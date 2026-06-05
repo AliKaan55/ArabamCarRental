@@ -13,6 +13,34 @@
 
 ---
 
+## 📸 Ekran Görüntüleri
+
+### Ana Sayfa
+![Ana Sayfa](https://github.com/user-attachments/assets/6383fe36-ea4d-48da-a745-1e3aaa4f2e0d)
+
+### Araç Listesi
+![Araç Listesi](https://github.com/user-attachments/assets/0c016e60-3815-4305-bba1-7badcfbbcc7d)
+
+### Araç Detay
+![Araç Detay](https://github.com/user-attachments/assets/d046759e-1d8e-478b-a79d-6bd08a4dfe0a)
+
+### Kiralama Detay
+![Kiralama Detay](https://github.com/user-attachments/assets/c4b6d4a5-b536-4ca2-92b2-5c4eadabcda8)
+
+### Hakkımızda
+![Hakkımızda](https://github.com/user-attachments/assets/8fe968c4-2480-4d12-b78c-0720c3fe0fa6)
+
+### Kiralama Formu
+![Kiralama Formu](https://github.com/user-attachments/assets/ad346331-bb95-43a3-a5f1-595c0a8e6d03)
+
+### Kiralamalarım
+![Kiralamalarım](https://github.com/user-attachments/assets/8e11e1bc-2747-4664-8798-63ced8688944)
+
+### Admin Paneli
+![Admin Paneli](https://github.com/user-attachments/assets/e0997875-e80a-4035-8836-8952074a051d)
+
+---
+
 ## ✨ Özellikler
 
 - 🔐 **Kullanıcı Sistemi** — Kayıt, giriş, şifre sıfırlama (token tabanlı), beni hatırla
@@ -46,13 +74,12 @@
 ### Adımlar
 
 ```bash
-# 1. Repoyu klonla
 git clone https://github.com/KULLANICI_ADINIZ/ArabamCarRental.git
 ```
 
 1. Visual Studio'da `ArabamCarRental.sln` dosyasını aç
 2. Solution Explorer'da projeye sağ tıkla → **Restore NuGet Packages**
-3. `Web.config` içinde admin şifresini güncelle (aşağıya bak)
+3. `Web.config` içinde admin şifresini güncelle
 4. **F5** ile çalıştır
 
 > **Not:** İlk çalıştırmada `App_Data/ArabamCarRental.db` otomatik oluşturulur.
