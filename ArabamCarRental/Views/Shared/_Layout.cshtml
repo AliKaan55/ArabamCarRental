@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Html.Raw(HttpUtility.HtmlDecode(ViewBag.Title)) - ArabamCarRental</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --fire: #d4500a;
+            --amber: #f0a500;
+            --smoke: #1a1a12;
+            --ash: #2a2a1e;
+            --black: #0a0a08;
+            --white: #e8e0d0;
+            --muted: rgba(232,224,208,0.5);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', 'Segoe UI', sans-serif;
+            background: #0e0e0b;
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar-main {
+            background: rgba(10,10,8,0.92);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(212,80,10,0.18);
+            padding: 0.6rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .navbar-brand {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.55rem;
+            letter-spacing: .04em;
+            color: var(--white) !important;
+        }
+
+            .navbar-brand span {
+                color: var(--fire);
+            }
+
+        .navbar-main .nav-link {
+            color: var(--muted) !important;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 0.4rem 0.9rem !important;
+            border-radius: 6px;
+            transition: color .18s, background .18s;
+        }
+
+            .navbar-main .nav-link:hover {
+                color: var(--white) !important;
+                background: rgba(212,80,10,0.12);
+            }
+
+        .nav-auth {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-nav-login {
+            background: transparent;
+            border: 1.5px solid rgba(232,224,208,0.25);
+            color: var(--white) !important;
+            border-radius: 7px;
+            padding: 0.35rem 1rem;
+            font-size: 0.86rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: border-color .18s, background .18s;
+        }
+
+            .btn-nav-login:hover {
+                border-color: var(--white);
+                background: rgba(232,224,208,0.07);
+            }
+
+        .btn-nav-register {
+            background: var(--fire);
+            border: none;
+            color: #fff !important;
+            border-radius: 7px;
+            padding: 0.35rem 1rem;
+            font-size: 0.86rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background .18s;
+        }
+
+            .btn-nav-register:hover {
+                background: #b84008;
+                color: #fff !important;
+            }
+
+        .user-dropdown .btn-user {
+            background: rgba(212,80,10,0.15);
+            border: 1.5px solid rgba(212,80,10,0.3);
+            color: var(--white);
+            border-radius: 7px;
+            padding: 0.35rem 1rem;
+            font-size: 0.86rem;
+            font-weight: 500;
+        }
+
+            .user-dropdown .btn-user:hover {
+                background: rgba(212,80,10,0.25);
+            }
+
+        .user-dropdown .dropdown-menu {
+            background: #151510;
+            border: 1px solid rgba(212,80,10,0.2);
+            border-radius: 10px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+            min-width: 175px;
+            margin-top: 6px;
+        }
+
+        .user-dropdown .dropdown-item {
+            font-size: 0.87rem;
+            padding: 0.5rem 1rem;
+            color: var(--muted);
+        }
+
+            .user-dropdown .dropdown-item:hover {
+                background: rgba(212,80,10,0.12);
+                color: var(--white);
+            }
+
+        .user-dropdown .dropdown-divider {
+            border-color: rgba(212,80,10,0.15);
+        }
+
+        .user-dropdown .dropdown-item-text {
+            color: rgba(232,224,208,0.35);
+        }
+
+        .navbar-toggler {
+            border-color: rgba(212,80,10,0.4);
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28232,224,208,0.75%29' stroke-linecap='round' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--black);
+            border-top: 1px solid rgba(212,80,10,0.15);
+            color: rgba(232,224,208,0.4);
+            padding: 1.5rem 0;
+            font-size: 0.83rem;
+            margin-top: auto;
+        }
+
+            footer a {
+                color: var(--fire);
+                text-decoration: none;
+            }
+
+                footer a:hover {
+                    color: var(--amber);
+                }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-main">
+        <div class="container">
+            <a class="navbar-brand" href="@Url.Action("Index","Home")">
+                <i class="bi bi-car-front-fill me-1"></i>Arabam<span>Rental</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index","Home")"><i class="bi bi-house me-1"></i>Ana Sayfa</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index","Car")"><i class="bi bi-car-front me-1"></i>Araçlar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("About","Home")"><i class="bi bi-info-circle me-1"></i>Hakkımızda</a>
+                    </li>
+                    @if (Session["IsAdmin"] != null && (bool)Session["IsAdmin"])
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Index","Admin")"><i class="bi bi-gear me-1"></i>Yönetim</a>
+                        </li>
+                    }
+                </ul>
+                <div class="nav-auth ms-lg-2 mt-2 mt-lg-0">
+                    @if (Session["UserId"] == null)
+                    {
+                        <a href="@Url.Action("Login","Account")" class="btn-nav-login">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Giriş Yap
+                        </a>
+                        <a href="@Url.Action("Register","Account")" class="btn-nav-register">
+                            <i class="bi bi-person-plus me-1"></i>Üye Ol
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="dropdown user-dropdown">
+                            <button class="btn btn-user dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle me-1"></i>@Session["UserName"]
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><span class="dropdown-item-text small px-3 py-1">@Session["UserEmail"]</span></li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
+                                    <a class="dropdown-item" href="@Url.Action("Index","Car")">
+                                        <i class="bi bi-car-front me-2" style="color:var(--fire)"></i>Araçlara Göz At
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="@Url.Action("MyRentals","Account")">
+                                        <i class="bi bi-journal-text me-2" style="color:var(--fire)"></i>Kiralamalarım
+                                    </a>
+                                </li>
+                                @if (Session["IsAdmin"] != null && (bool)Session["IsAdmin"])
+                                {
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("Index","Admin")">
+                                            <i class="bi bi-speedometer2 me-2" style="color:var(--amber)"></i>Admin Panel
+                                        </a>
+                                    </li>
+                                }
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
+                                    <a class="dropdown-item" style="color:#e05050" href="@Url.Action("Logout","Account")">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Çıkış Yap
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>@RenderBody()</main>
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">&copy; @DateTime.Now.Year <a href="@Url.Action("Index","Home")">ArabamRental</a> &mdash; Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("Scripts", required: false)
+
+    <!-- Engine Loading Overlay -->
+    <div id="engineOverlay" style="
+  display:none; position:fixed; inset:0; z-index:99999;
+  background:#0a0a08;
+  flex-direction:column; align-items:center; justify-content:center; gap:2rem;
+">
+        <div class="ov-ring">
+            <div class="ov-core">
+                <div class="ov-led"></div>
+                <span class="ov-lbl-e">ENGINE</span>
+                <span class="ov-lbl-s">START</span>
+                <span class="ov-lbl-s">STOP</span>
+            </div>
+        </div>
+        <div class="ov-status">MOTOR ÇALIŞIYOR...</div>
+        <div class="ov-bars">
+            <div class="ov-bar"></div>
+            <div class="ov-bar"></div>
+            <div class="ov-bar"></div>
+            <div class="ov-bar"></div>
+            <div class="ov-bar"></div>
+        </div>
+    </div>
+
+    <script>
+(function(){
+  var overlay = document.getElementById('engineOverlay');
+
+  var loginFlag    = sessionStorage.getItem('showEngineOverlay');
+  var registerFlag = sessionStorage.getItem('showUnlockOverlay');
+
+  if ((loginFlag || registerFlag) && overlay) {
+    sessionStorage.removeItem('showEngineOverlay');
+    sessionStorage.removeItem('loginSubmitted');
+    sessionStorage.removeItem('showUnlockOverlay');
+    sessionStorage.removeItem('registerSubmitted');
+
+    if (registerFlag) {
+      var statusEl = overlay.querySelector('.ov-status');
+      if (statusEl) statusEl.textContent = 'KİLİT AÇILIYOR...';
+    }
+
+    overlay.style.display = 'flex';
+
+    var soundFile = registerFlag
+      ? '@Url.Content("~/Content/sounds/unlock_car.mp3")'
+      : '@Url.Content("~/Content/sounds/engine-success.wav")';
+
+    var snd = new Audio(soundFile);
+    snd.play().catch(function(){});
+
+    var done = false;
+    function fadeOut() {
+      if (done) return;
+      done = true;
+      overlay.classList.add('ov-fadeout');
+      setTimeout(function(){ overlay.style.display = 'none'; }, 600);
+    }
+    snd.addEventListener('ended', fadeOut);
+    setTimeout(fadeOut, 3500);
+  }
+})();
+    </script>
+</body>
+</html>

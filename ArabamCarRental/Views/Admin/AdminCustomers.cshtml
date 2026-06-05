@@ -1,0 +1,259 @@
+@model IEnumerable<ArabamCarRental.Models.Customer>
+
+@{
+    ViewBag.Title = "Müşteri Yönetimi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+<style>
+:root { --fire:#d4500a; --amber:#f0a500; --black:#0a0a08; --white:#e8e0d0; --muted:rgba(232,224,208,0.5); }
+.admin-page { background:#0a0a08; min-height:calc(100vh - 120px); padding:2.5rem 0; }
+.page-topbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; }
+.page-topbar h2 { font-family:'Bebas Neue',sans-serif; font-size:2.2rem; letter-spacing:.04em; color:var(--white); margin:0; }
+.btn-back { background:rgba(212,80,10,0.12); border:1px solid rgba(212,80,10,0.25); color:var(--fire); font-size:.85rem; font-weight:600; padding:.5rem 1.1rem; border-radius:9px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:background .2s; }
+.btn-back:hover { background:rgba(212,80,10,0.22); color:var(--fire); }
+
+.stat-row { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2rem; }
+.stat-card { background:#1a1a12; border:1px solid rgba(212,80,10,0.15); border-radius:14px; padding:1rem 1.4rem; flex:1; min-width:130px; }
+.stat-card .sv { font-family:'Bebas Neue',sans-serif; font-size:1.9rem; color:var(--white); line-height:1; }
+.stat-card .sl { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
+.stat-card.fire .sv  { color:var(--fire); }
+.stat-card.amber .sv { color:var(--amber); }
+
+.filter-bar { display:flex; gap:.8rem; flex-wrap:wrap; margin-bottom:1.5rem; align-items:center; }
+.search-wrap { position:relative; flex:1; min-width:220px; }
+.search-wrap i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--fire); font-size:.9rem; }
+.search-input { background:#1a1a12; border:1px solid rgba(212,80,10,0.2); border-radius:9px; color:var(--white); font-size:.88rem; padding:.55rem .9rem .55rem 2.2rem; width:100%; outline:none; transition:border-color .2s; }
+.search-input:focus { border-color:var(--fire); }
+.search-input::placeholder { color:rgba(232,224,208,0.25); }
+
+.table-card { background:#1a1a12; border:1px solid rgba(212,80,10,0.15); border-radius:16px; overflow:hidden; }
+.cust-table { width:100%; border-collapse:collapse; }
+.cust-table thead tr { background:linear-gradient(90deg,#1f1410,#1a1a12); border-bottom:1px solid rgba(212,80,10,0.2); }
+.cust-table thead th { padding:.85rem 1rem; font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--fire); font-weight:700; white-space:nowrap; }
+.cust-table tbody tr { border-bottom:1px solid rgba(255,255,255,0.04); transition:background .15s; }
+.cust-table tbody tr:last-child { border-bottom:none; }
+.cust-table tbody tr:hover { background:rgba(212,80,10,0.04); }
+.cust-table td { padding:.9rem 1rem; vertical-align:middle; font-size:.87rem; color:var(--white); }
+
+.td-id { font-family:'Bebas Neue',sans-serif; font-size:1rem; color:rgba(232,224,208,0.35); }
+.avatar-circle {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: rgba(212,80,10,0.15);
+    border: 1.5px solid rgba(212,80,10,0.3);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: .95rem; color: var(--fire);
+    flex-shrink: 0;
+}
+.name-cell { display:flex; align-items:center; gap:.7rem; }
+.name-cell .fullname { font-weight:600; }
+.email-cell { color:var(--muted); font-size:.84rem; }
+.email-cell a { color:rgba(212,80,10,0.7); text-decoration:none; }
+.email-cell a:hover { color:var(--fire); }
+.phone-cell { color:rgba(240,165,0,0.7); font-size:.85rem; }
+.no-results { text-align:center; padding:3rem; color:var(--muted); font-size:.9rem; display:none; }
+.no-results i { display:block; font-size:2.5rem; color:rgba(212,80,10,0.2); margin-bottom:.8rem; }
+
+.action-btns { display:flex; gap:6px; flex-wrap:wrap; }
+.btn-edit   { background:rgba(240,165,0,0.1); border:1px solid rgba(240,165,0,0.3); color:#f0a500; font-size:.75rem; font-weight:700; padding:4px 12px; border-radius:7px; cursor:pointer; transition:background .2s; white-space:nowrap; }
+.btn-edit:hover   { background:rgba(240,165,0,0.2); }
+.btn-delete { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#f87171; font-size:.75rem; font-weight:700; padding:4px 12px; border-radius:7px; cursor:pointer; transition:background .2s; white-space:nowrap; }
+.btn-delete:hover { background:rgba(248,113,113,0.2); }
+
+/* Edit Modal */
+.edit-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center; }
+.edit-modal-overlay.open { display:flex; }
+.edit-modal { background:#1a1a12; border:1px solid rgba(212,80,10,0.25); border-radius:16px; padding:2rem; width:100%; max-width:480px; }
+.edit-modal h4 { font-family:"Bebas Neue",sans-serif; font-size:1.6rem; color:var(--white); margin:0 0 1.5rem; }
+.form-group { margin-bottom:1rem; }
+.form-group label { display:block; font-size:.75rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:.35rem; }
+.form-control-dark { background:#0a0a08; border:1px solid rgba(212,80,10,0.2); border-radius:8px; color:var(--white); font-size:.88rem; padding:.55rem .9rem; width:100%; outline:none; }
+.form-control-dark:focus { border-color:var(--fire); }
+.modal-footer { display:flex; gap:.8rem; justify-content:flex-end; margin-top:1.5rem; }
+.btn-save   { background:var(--fire); border:none; color:#fff; font-size:.85rem; font-weight:700; padding:.6rem 1.4rem; border-radius:9px; cursor:pointer; }
+.btn-save:hover { background:#b8430a; }
+.btn-cancel { background:rgba(232,224,208,0.08); border:1px solid rgba(232,224,208,0.15); color:var(--muted); font-size:.85rem; padding:.6rem 1.4rem; border-radius:9px; cursor:pointer; }
+.btn-cancel:hover { background:rgba(232,224,208,0.12); }
+
+@@media(max-width:600px){
+  .cust-table thead th:nth-child(4),
+  .cust-table tbody td:nth-child(4) { display:none; }
+  .cust-table thead th:nth-child(5),
+  .cust-table tbody td:nth-child(5) { display:none; }
+}
+</style>
+}
+
+<div class="admin-page">
+  <div class="container-fluid px-4">
+
+    <div class="page-topbar">
+      <h2><i class="bi bi-people me-2" style="color:var(--fire)"></i>Müşteri Yönetimi</h2>
+      <a href="/Admin/Index" class="btn-back"><i class="bi bi-arrow-left"></i>Araç Listesine Dön</a>
+    </div>
+
+    <!-- İstatistikler -->
+    <div class="stat-row">
+      <div class="stat-card fire">
+        <div class="sv">@Model.Count()</div>
+        <div class="sl">Toplam Müşteri</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="sv">@Model.Count(c => !string.IsNullOrEmpty(c.PhoneNumber))</div>
+        <div class="sl">Telefon Kayıtlı</div>
+      </div>
+    </div>
+
+    <!-- Arama -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Ad, soyad veya e-posta ara…" />
+      </div>
+      <span style="font-size:.8rem;color:var(--muted);" id="resultCount">@Model.Count() müşteri</span>
+    </div>
+
+    <!-- Tablo -->
+    <div class="table-card">
+      <div style="overflow-x:auto">
+        <table class="cust-table" id="custTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Ad Soyad</th>
+              <th>E-Posta</th>
+              <th>Telefon</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            @foreach (var c in Model)
+            {
+              var initials = (c.FirstName?.Length > 0 ? c.FirstName[0].ToString() : "") +
+                             (c.LastName?.Length  > 0 ? c.LastName[0].ToString()  : "");
+              <tr data-search="@((c.FirstName + " " + c.LastName + " " + c.Email).ToLower())">
+                <td class="td-id">#@c.CustomerID</td>
+                <td>
+                  <div class="name-cell">
+                    <div class="avatar-circle">@initials.ToUpper()</div>
+                    <div class="fullname">@c.FirstName @c.LastName</div>
+                  </div>
+                </td>
+                <td class="email-cell">
+                  <a href="mailto:@c.Email">
+                    <i class="bi bi-envelope me-1"></i>@c.Email
+                  </a>
+                </td>
+                <td class="phone-cell">
+                  @if (!string.IsNullOrEmpty(c.PhoneNumber))
+                  {
+                    <i class="bi bi-telephone me-1"></i>@c.PhoneNumber
+                  }
+                  else
+                  {
+                    <span style="color:rgba(232,224,208,0.2);font-size:.8rem;">—</span>
+                  }
+                </td>
+                <td>
+                  <div class="action-btns">
+                    <button class="btn-edit" onclick="openEditModal(@c.CustomerID, '@c.FirstName', '@c.LastName', '@c.Email', '@(c.PhoneNumber ?? "")')">
+                      <i class="bi bi-pencil me-1"></i>Düzenle
+                    </button>
+                    <form action="/Admin/DeleteCustomer" method="post" style="display:inline;" onsubmit="return confirm('@c.FirstName @c.LastName adlı müşteriyi silmek istiyor musunuz?')">
+                      @Html.AntiForgeryToken()
+                      <input type="hidden" name="id" value="@c.CustomerID" />
+                      <button type="submit" class="btn-delete"><i class="bi bi-trash me-1"></i>Sil</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="no-results" id="noResults">
+          <i class="bi bi-person-x"></i>Sonuç bulunamadı.
+        </div>
+        @if (!Model.Any())
+        {
+          <div style="text-align:center;padding:3rem;color:var(--muted);font-size:.9rem;">
+            <i class="bi bi-people" style="display:block;font-size:2.5rem;color:rgba(212,80,10,0.2);margin-bottom:.8rem;"></i>
+            Henüz kayıtlı müşteri yok.
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- Edit Modal -->
+<div class="edit-modal-overlay" id="editModal">
+  <div class="edit-modal">
+    <h4><i class="bi bi-person-gear me-2" style="color:var(--fire)"></i>Müşteri Düzenle</h4>
+    <form action="/Admin/EditCustomer" method="post">
+      @Html.AntiForgeryToken()
+      <input type="hidden" name="CustomerID" id="editId" />
+      <div class="form-group">
+        <label>Ad</label>
+        <input type="text" name="FirstName" id="editFirstName" class="form-control-dark" required />
+      </div>
+      <div class="form-group">
+        <label>Soyad</label>
+        <input type="text" name="LastName" id="editLastName" class="form-control-dark" required />
+      </div>
+      <div class="form-group">
+        <label>E-Posta</label>
+        <input type="email" name="Email" id="editEmail" class="form-control-dark" required />
+      </div>
+      <div class="form-group">
+        <label>Telefon</label>
+        <input type="text" name="PhoneNumber" id="editPhone" class="form-control-dark" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" onclick="closeEditModal()">İptal</button>
+        <button type="submit" class="btn-save"><i class="bi bi-check-lg me-1"></i>Kaydet</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+(function(){
+  var searchInput = document.getElementById('searchInput');
+  var rows        = document.querySelectorAll('#tableBody tr');
+  var resultCount = document.getElementById('resultCount');
+  var noResults   = document.getElementById('noResults');
+
+  searchInput.addEventListener('input', function(){
+    var q = this.value.toLowerCase().trim();
+    var visible = 0;
+    rows.forEach(function(row){
+      var show = !q || row.dataset.search.includes(q);
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    resultCount.textContent = visible + ' müşteri';
+    noResults.style.display = (visible === 0 && rows.length > 0) ? 'block' : 'none';
+  });
+})();
+
+function openEditModal(id, firstName, lastName, email, phone) {
+  document.getElementById('editId').value        = id;
+  document.getElementById('editFirstName').value = firstName;
+  document.getElementById('editLastName').value  = lastName;
+  document.getElementById('editEmail').value     = email;
+  document.getElementById('editPhone').value     = phone;
+  document.getElementById('editModal').classList.add('open');
+}
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+}
+document.getElementById('editModal').addEventListener('click', function(e){
+  if (e.target === this) closeEditModal();
+});
+</script>
+}

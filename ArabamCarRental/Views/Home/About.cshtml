@@ -1,0 +1,170 @@
+@{
+    ViewBag.Title = "Hakk&#305;m&#305;zda";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Styles {
+<style>
+:root { --fire:#d4500a; --amber:#f0a500; --black:#0a0a08; --white:#e8e0d0; --muted:rgba(232,224,208,0.5); }
+
+.about-hero { background:#0a0a08; padding:5.5rem 0 4rem; position:relative; overflow:hidden; }
+.about-hero::before { content:''; position:absolute; top:-20%; right:-5%; width:650px; height:650px; border-radius:50%; background:radial-gradient(circle,rgba(212,80,10,0.14) 0%,transparent 65%); pointer-events:none; }
+.about-hero::after  { content:''; position:absolute; bottom:-10%; left:-5%; width:400px; height:400px; border-radius:50%; background:radial-gradient(circle,rgba(240,165,0,0.07) 0%,transparent 65%); pointer-events:none; }
+.eyebrow { font-size:.74rem; font-weight:700; letter-spacing:.25em; text-transform:uppercase; color:var(--fire); display:flex; align-items:center; gap:8px; margin-bottom:.8rem; }
+.eyebrow::before { content:''; width:28px; height:2px; background:var(--fire); }
+.page-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(3rem,8vw,6rem); color:var(--white); line-height:.95; margin-bottom:1.2rem; }
+.page-title span { color:var(--fire); }
+.page-sub { font-size:1.05rem; color:var(--muted); max-width:480px; line-height:1.75; }
+
+/* Stat kartları */
+.stat-row { margin-top:3.5rem; }
+.stat-box { text-align:center; padding:1.8rem 1rem; background:rgba(26,26,18,0.7); border:1px solid rgba(212,80,10,0.15); border-radius:14px; transition:border-color .2s,transform .2s; }
+.stat-box:hover { border-color:var(--fire); transform:translateY(-3px); }
+.stat-box .num  { font-family:'Bebas Neue',sans-serif; font-size:3rem; color:var(--white); line-height:1; }
+.stat-box .num em { color:var(--fire); font-style:normal; }
+.stat-box .lbl  { font-size:.76rem; color:var(--muted); text-transform:uppercase; letter-spacing:.12em; margin-top:.3rem; }
+
+/* Mission section */
+.section-mission { background:#0e0e0b; padding:5rem 0; }
+.section-label { font-size:.72rem; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--fire); margin-bottom:.6rem; }
+.section-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.2rem,4vw,3.5rem); color:var(--white); line-height:1; margin-bottom:1.5rem; }
+.section-body  { font-size:.96rem; color:var(--muted); line-height:1.85; }
+
+.feature-item { display:flex; gap:1.2rem; margin-bottom:1.6rem; }
+.feature-icon { width:48px; height:48px; flex-shrink:0; background:rgba(212,80,10,0.12); border:1px solid rgba(212,80,10,0.25); border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:1.25rem; color:var(--fire); }
+.feature-title { font-weight:700; color:var(--white); font-size:.97rem; margin-bottom:.3rem; }
+.feature-desc  { font-size:.86rem; color:var(--muted); line-height:1.6; }
+
+/* Values */
+.section-values { background:#111108; padding:5rem 0; }
+.value-card { background:#1a1a12; border:1px solid rgba(212,80,10,0.12); border-radius:14px; padding:2rem 1.8rem; height:100%; transition:border-color .2s,transform .2s,box-shadow .2s; }
+.value-card:hover { border-color:var(--fire); transform:translateY(-4px); box-shadow:0 16px 40px rgba(212,80,10,0.14); }
+.value-num  { font-family:'Bebas Neue',sans-serif; font-size:3.5rem; color:rgba(212,80,10,0.1); line-height:1; margin-bottom:.5rem; }
+.value-icon { font-size:1.8rem; color:var(--fire); margin-bottom:1rem; display:block; }
+.value-title{ font-weight:700; color:var(--white); font-size:1.05rem; margin-bottom:.6rem; }
+.value-desc { font-size:.86rem; color:var(--muted); line-height:1.65; }
+
+/* CTA */
+.section-cta { background:#0a0a08; border-top:1px solid rgba(212,80,10,0.12); padding:5rem 0; text-align:center; position:relative; overflow:hidden; }
+.section-cta::before { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:700px; height:400px; border-radius:50%; background:radial-gradient(circle,rgba(212,80,10,0.1) 0%,transparent 65%); pointer-events:none; }
+.cta-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.2rem,5vw,3.8rem); color:var(--white); line-height:1; margin-bottom:1rem; }
+.cta-sub   { color:var(--muted); font-size:.97rem; margin-bottom:2rem; }
+.btn-fire  { background:var(--fire); color:#fff; font-weight:700; font-size:.9rem; padding:.88rem 2.2rem; border-radius:7px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:background .2s,transform .15s,box-shadow .2s; }
+.btn-fire:hover { background:#b84008; color:#fff; transform:translateY(-2px); box-shadow:0 12px 32px rgba(212,80,10,0.4); }
+.btn-ghost { background:transparent; color:var(--white); font-weight:500; font-size:.9rem; padding:.88rem 2rem; border-radius:7px; border:1.5px solid rgba(232,224,208,0.2); text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:border-color .2s,background .2s; }
+.btn-ghost:hover { border-color:rgba(232,224,208,0.6); background:rgba(232,224,208,0.07); color:var(--white); }
+
+.reveal { opacity:0; transform:translateY(30px); transition:opacity .7s ease,transform .7s ease; }
+.reveal.visible { opacity:1; transform:none; }
+</style>
+}
+
+<!-- HERO -->
+<section class="about-hero">
+  <div class="container position-relative" style="z-index:1">
+    <div class="eyebrow">Biz Kimiz?</div>
+    <h1 class="page-title">Arabam<span>Rental</span><br>Hikayesi</h1>
+    <p class="page-sub">2015'ten bu yana T&#252;rkiye'nin d&#246;rt bir yan&#305;nda premium ara&#231; kiralama hizmeti sunuyoruz.</p>
+    <div class="stat-row row g-3 reveal">
+      <div class="col-6 col-md-3"><div class="stat-box"><div class="num">500<em>+</em></div><div class="lbl">Ara&#231;</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-box"><div class="num">50<em>K</em></div><div class="lbl">M&#252;&#351;teri</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-box"><div class="num">15<em>+</em></div><div class="lbl">&#350;ehir</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-box"><div class="num">7<em>/24</em></div><div class="lbl">Destek</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section class="section-mission">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5 reveal">
+        <div class="section-label">Misyonumuz</div>
+        <h2 class="section-title">Her Yolculuk<br>&#214;zel Olmal&#305;</h2>
+        <p class="section-body">M&#252;&#351;terilerimize en iyi ara&#231; kiralama deneyimini sunmak i&#231;in s&#252;rekli &#231;al&#305;&#351;&#305;yoruz. Filosumuzu d&#252;zenli g&#252;ncelliyor, hizmet kalitemizi her ge&#231;en g&#252;n art&#305;r&#305;yoruz.</p>
+      </div>
+      <div class="col-lg-7 reveal">
+        <div class="feature-item">
+          <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+          <div><div class="feature-title">G&#252;venilir Hizmet</div><div class="feature-desc">T&#252;m ara&#231;lar&#305;m&#305;z d&#252;zenli bak&#305;mdan ge&#231;irilir, sigorta kapsam&#305; eksiksiz sunulur.</div></div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon"><i class="bi bi-currency-dollar"></i></div>
+          <div><div class="feature-title">&#350;effaf Fiyatland&#305;rma</div><div class="feature-desc">Gizli &#252;cret yok. G&#246;rd&#252;&#287;&#252;n&#252;z fiyat, &#246;dedi&#287;iniz fiyatt&#305;r.</div></div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon"><i class="bi bi-headset"></i></div>
+          <div><div class="feature-title">7/24 Destek</div><div class="feature-desc">G&#252;n&#252;n her saati ula&#351;abilecer&#287;iniz destek ekibimiz hizmetinizde.</div></div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon"><i class="bi bi-geo-alt"></i></div>
+          <div><div class="feature-title">Geni&#351; A&#287;</div><div class="feature-desc">15+ &#351;ehirde ofis ve teslim noktas&#305; ile T&#252;rkiye genelinde hizmet.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="section-values">
+  <div class="container">
+    <div class="text-center mb-5 reveal">
+      <div class="section-label" style="justify-content:center">De&#287;erlerimiz</div>
+      <h2 class="section-title">Bizi Farkl&#305; K&#305;lan<br>4 &#304;lke</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3 reveal">
+        <div class="value-card">
+          <div class="value-num">01</div>
+          <i class="bi bi-star-fill value-icon"></i>
+          <div class="value-title">Kalite</div>
+          <p class="value-desc">Filosumuzdaki her ara&#231; son model ve bak&#305;ml&#305;d&#305;r.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 reveal">
+        <div class="value-card">
+          <div class="value-num">02</div>
+          <i class="bi bi-lightning-fill value-icon"></i>
+          <div class="value-title">H&#305;z</div>
+          <p class="value-desc">Dakikalar i&#231;inde kiralama, sizi bekletmeden yola &#231;&#305;kma.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 reveal">
+        <div class="value-card">
+          <div class="value-num">03</div>
+          <i class="bi bi-heart-fill value-icon"></i>
+          <div class="value-title">Sayg&#305;</div>
+          <p class="value-desc">Her m&#252;&#351;teri &#246;zeldir. Ki&#351;isel deneyim sunmak temel prensibimiz.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 reveal">
+        <div class="value-card">
+          <div class="value-num">04</div>
+          <i class="bi bi-leaf-fill value-icon"></i>
+          <div class="value-title">S&#252;rd&#252;r&#252;lebilirlik</div>
+          <p class="value-desc">Elektrikli ve hibrit ara&#231; oran&#305;m&#305;z&#305; her y&#305;l art&#305;r&#305;yoruz.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section-cta">
+  <div class="container position-relative">
+    <h2 class="cta-title reveal">Hemen Ba&#351;la,<br>&#304;lk Kiralaman %10 &#304;ndirimli</h2>
+    <p class="cta-sub reveal">&#220;cretsiz &#252;yelik ile filoya kat&#305;l.</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap reveal">
+      <a href="@Url.Action("Index","Car")" class="btn-fire"><i class="bi bi-car-front-fill"></i> Ara&#231;lar&#305; &#304;ncele</a>
+      <a href="@Url.Action("Register","Account")" class="btn-ghost"><i class="bi bi-person-plus"></i> Kaydol</a>
+    </div>
+  </div>
+</section>
+
+@section Scripts {
+<script>
+const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e,i) => { if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'),i*100); obs.unobserve(e.target); } });
+},{ threshold:0.1 });
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+}

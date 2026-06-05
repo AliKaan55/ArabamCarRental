@@ -1,0 +1,35 @@
+﻿@{
+    ViewBag.Title = "Yönetici Girişi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg mt-5">
+                <div class="card-header bg-dark text-white text-center p-3">
+                    <h4 class="mb-0">Yönetim Paneli Girişi</h4>
+                </div>
+                <div class="card-body p-4">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger text-center">@ViewBag.Error</div>
+                    }
+
+                    <form action="/Admin/Login" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold">Kullanıcı Adı</label>
+                            <input type="text" name="username" class="form-control" required placeholder="admin" />
+                        </div>
+                        <div class="form-group mb-4">
+                            <label class="font-weight-bold">Şifre</label>
+                            <input type="password" name="password" class="form-control" required placeholder="******" />
+                        </div>
+                        <button type="submit" class="btn btn-dark btn-block btn-lg w-100">Giriş Yap</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

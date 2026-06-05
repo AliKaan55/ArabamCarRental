@@ -1,0 +1,461 @@
+@model ArabamCarRental.Models.Car
+
+@{
+    ViewBag.Title = "Araç Kirala - " + Model.Brand;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+<style>
+:root { --fire:#d4500a; --amber:#f0a500; --black:#0a0a08; --white:#e8e0d0; --muted:rgba(232,224,208,0.5); }
+.rent-page { background:#0a0a08; min-height:calc(100vh - 120px); padding:3rem 0; }
+.rent-card { background:#1a1a12; border:1px solid rgba(212,80,10,0.18); border-radius:18px; overflow:hidden; box-shadow:0 24px 60px rgba(0,0,0,0.5); }
+.rent-header { background:linear-gradient(135deg, #8a2a00 0%, #d4500a 100%); padding:1.8rem 2rem; color:#fff; display:flex; align-items:center; gap:12px; }
+.rent-header i { font-size:1.8rem; opacity:.85; }
+.rent-header h4 { font-family:'Bebas Neue',sans-serif; font-size:1.7rem; letter-spacing:.04em; margin:0 0 .15rem; }
+.rent-header small { font-size:.83rem; opacity:.8; }
+.rent-body { padding:2rem; }
+
+/* Fiyat kutusu */
+.price-box { background:rgba(212,80,10,0.1); border:1px solid rgba(212,80,10,0.25); border-radius:10px; padding:1rem 1.3rem; margin-bottom:1.8rem; display:flex; align-items:center; gap:12px; }
+.price-box .num { font-family:'Bebas Neue',sans-serif; font-size:2rem; color:var(--white); line-height:1; }
+.price-box .num small { font-family:'DM Sans',sans-serif; font-size:.75rem; color:var(--muted); font-weight:400; }
+.price-box i { font-size:1.5rem; color:var(--fire); }
+
+/* Toplam ücret kutusu */
+.total-box {
+  background:rgba(240,165,0,0.07);
+  border:1.5px solid rgba(240,165,0,0.25);
+  border-radius:12px;
+  padding:1.1rem 1.4rem;
+  margin-top:1.2rem;
+  display:none;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  transition:all .3s ease;
+}
+.total-box.visible { display:flex; }
+.total-box .total-left { font-size:.82rem; color:var(--muted); line-height:1.6; }
+.total-box .total-left strong { color:var(--white); font-weight:600; }
+.total-box .total-right { text-align:right; flex-shrink:0; }
+.total-box .total-amount { font-family:'Bebas Neue',sans-serif; font-size:2.2rem; color:var(--amber); line-height:1; }
+.total-box .total-label { font-size:.72rem; color:rgba(240,165,0,0.6); letter-spacing:.08em; text-transform:uppercase; }
+
+.sec-label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--fire); margin:1.4rem 0 .9rem; display:flex; align-items:center; gap:7px; }
+.sec-label::after { content:''; flex:1; height:1px; background:rgba(212,80,10,0.15); }
+.form-label { font-size:.83rem; color:var(--muted); font-weight:500; margin-bottom:.4rem; }
+.form-control { background:#111108; border:1.5px solid rgba(212,80,10,0.2); border-radius:9px; color:var(--white); font-size:.92rem; padding:.65rem 1rem; transition:border-color .2s, box-shadow .2s; }
+.form-control:focus { border-color:var(--fire); box-shadow:0 0 0 3px rgba(212,80,10,0.15); background:#111108; color:var(--white); outline:none; }
+.btn-submit { background:var(--fire); border:none; color:#fff; font-weight:700; font-size:.95rem; padding:.9rem; border-radius:10px; width:100%; margin-top:1.5rem; transition:background .2s, transform .15s, box-shadow .2s; }
+.btn-submit:hover { background:#b84008; transform:translateY(-1px); box-shadow:0 10px 28px rgba(212,80,10,0.4); }
+.btn-submit:disabled { background:#444; cursor:not-allowed; transform:none; box-shadow:none; }
+.alert-danger { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#f87171; border-radius:10px; font-size:.88rem; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) sepia(1) saturate(3) hue-rotate(10deg); opacity:.7; cursor:pointer; }
+
+/* ── ÖDEME MODALI ── */
+.pay-backdrop {
+  display:none; position:fixed; inset:0; z-index:9000;
+  background:rgba(5,5,3,0.85);
+  backdrop-filter:blur(6px);
+  align-items:center; justify-content:center;
+  padding:1rem;
+}
+.pay-backdrop.open { display:flex; }
+
+.pay-modal {
+  background:#1a1a12;
+  border:1px solid rgba(212,80,10,0.25);
+  border-radius:20px;
+  width:100%; max-width:480px;
+  box-shadow:0 40px 100px rgba(0,0,0,0.7);
+  overflow:hidden;
+  animation:modal-in .3s cubic-bezier(.34,1.3,.64,1);
+}
+@@keyframes modal-in {
+  from { opacity:0; transform:translateY(30px) scale(.96); }
+  to   { opacity:1; transform:none; }
+}
+
+.pay-modal-header {
+  background:linear-gradient(135deg, #8a2a00 0%, #d4500a 100%);
+  padding:1.4rem 1.8rem;
+  display:flex; align-items:center; justify-content:space-between;
+  color:#fff;
+}
+.pay-modal-header h5 { font-family:'Bebas Neue',sans-serif; font-size:1.5rem; letter-spacing:.04em; margin:0; }
+.pay-modal-close {
+  background:rgba(255,255,255,.15); border:none; color:#fff;
+  width:32px; height:32px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:1rem; transition:background .2s;
+}
+.pay-modal-close:hover { background:rgba(255,255,255,.28); }
+
+.pay-modal-body { padding:1.8rem; }
+
+/* Kart önizleme */
+.card-preview {
+  background:linear-gradient(135deg, #1e1e14 0%, #2a2a1a 50%, #1a1612 100%);
+  border:1px solid rgba(212,80,10,0.3);
+  border-radius:14px;
+  padding:1.4rem 1.6rem;
+  margin-bottom:1.6rem;
+  position:relative;
+  overflow:hidden;
+  min-height:110px;
+}
+.card-preview::before {
+  content:'';
+  position:absolute; top:-30px; right:-30px;
+  width:140px; height:140px; border-radius:50%;
+  background:radial-gradient(circle, rgba(212,80,10,0.15) 0%, transparent 70%);
+}
+.card-chip {
+  width:36px; height:26px; border-radius:5px;
+  background:linear-gradient(135deg, #c8a800 0%, #f0d060 40%, #c8a800 100%);
+  margin-bottom:.8rem;
+  box-shadow:0 2px 6px rgba(0,0,0,0.4);
+}
+.card-number-preview {
+  font-family:'Courier New', monospace;
+  font-size:1.15rem; color:var(--white);
+  letter-spacing:.2em; margin-bottom:.6rem;
+  display:flex; gap:.5rem;
+}
+.card-number-preview span { opacity:.4; }
+.card-number-preview .revealed { opacity:1; color:#fff; }
+.card-bottom { display:flex; justify-content:space-between; align-items:flex-end; }
+.card-holder-preview { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+.card-holder-name { font-size:.88rem; color:var(--white); font-weight:600; text-transform:uppercase; margin-top:1px; }
+.card-expiry-preview { text-align:right; font-size:.75rem; color:var(--muted); }
+.card-expiry-val { font-size:.92rem; color:var(--white); font-family:'Courier New',monospace; }
+
+/* Form elemanları modal içinde */
+.pay-form-group { margin-bottom:1rem; }
+.pay-label { font-size:.78rem; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.08em; margin-bottom:.35rem; display:block; }
+.pay-input {
+  background:#111108; border:1.5px solid rgba(212,80,10,0.2);
+  border-radius:9px; color:var(--white); font-size:.93rem;
+  padding:.6rem .9rem; width:100%;
+  transition:border-color .2s, box-shadow .2s;
+  outline:none;
+}
+.pay-input:focus { border-color:var(--fire); box-shadow:0 0 0 3px rgba(212,80,10,0.15); }
+.pay-input::placeholder { color:rgba(232,224,208,0.2); }
+
+/* Tutar özeti modal içinde */
+.pay-summary {
+  background:rgba(240,165,0,0.07); border:1px solid rgba(240,165,0,0.2);
+  border-radius:10px; padding:.9rem 1.1rem;
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:1.3rem;
+}
+.pay-summary .ps-label { font-size:.8rem; color:var(--muted); }
+.pay-summary .ps-amount { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; color:var(--amber); }
+
+/* Ödeme butonu */
+.btn-pay {
+  background:linear-gradient(135deg, #d4500a 0%, #f0a500 100%);
+  border:none; color:#fff; font-weight:700; font-size:1rem;
+  padding:.9rem; border-radius:10px; width:100%;
+  transition:opacity .2s, transform .15s, box-shadow .2s;
+  letter-spacing:.02em;
+}
+.btn-pay:hover { opacity:.9; transform:translateY(-1px); box-shadow:0 10px 28px rgba(212,80,10,0.45); }
+
+/* Güvenlik rozetleri */
+.pay-security { display:flex; align-items:center; justify-content:center; gap:1rem; margin-top:1rem; }
+.pay-security span { font-size:.72rem; color:rgba(232,224,208,0.3); display:flex; align-items:center; gap:4px; }
+.pay-security i { font-size:.8rem; }
+
+/* Başarı ekranı */
+.pay-success { display:none; text-align:center; padding:2rem 1rem; }
+.pay-success .success-icon {
+  width:70px; height:70px; border-radius:50%;
+  background:rgba(0,180,70,0.15); border:2px solid rgba(0,180,70,0.4);
+  display:flex; align-items:center; justify-content:center;
+  font-size:2rem; color:#00cc55;
+  margin:0 auto 1.2rem;
+  animation:pop-in .4s cubic-bezier(.34,1.6,.64,1);
+}
+@@keyframes pop-in { from{transform:scale(0)} to{transform:scale(1)} }
+.pay-success h5 { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; color:var(--white); letter-spacing:.05em; margin-bottom:.5rem; }
+.pay-success p { color:var(--muted); font-size:.88rem; line-height:1.6; }
+</style>
+}
+
+<div class="rent-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7 col-md-9">
+        <div class="rent-card">
+          <div class="rent-header">
+            <i class="bi bi-key-fill"></i>
+            <div>
+              <h4>Kiralama Formu</h4>
+              <small>@Model.Brand @Model.Model</small>
+            </div>
+          </div>
+          <div class="rent-body">
+            @if (ViewBag.Error != null)
+            { <div class="alert alert-danger mb-3">@ViewBag.Error</div> }
+
+            <div class="price-box">
+              <i class="bi bi-tag-fill"></i>
+              <div>
+                <div style="font-size:.75rem;color:var(--muted);margin-bottom:2px;">Günlük Ücret</div>
+                <div class="num">&#8378;@Model.DailyPrice.ToString("N0") <small>/ gün</small></div>
+              </div>
+            </div>
+
+            <form id="rentForm" action="/Car/Rent" method="post">
+              @Html.AntiForgeryToken()
+              <input type="hidden" name="carId" value="@Model.CarID" />
+
+              <div class="sec-label"><i class="bi bi-person"></i> İletişim Bilgileriniz</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Adınız</label>
+                  <input type="text" name="firstName" id="firstName" class="form-control" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Soyadınız</label>
+                  <input type="text" name="lastName" id="lastName" class="form-control" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">E-Posta</label>
+                  <input type="email" name="email" class="form-control" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Telefon</label>
+                  <input type="tel" name="phone" class="form-control" required />
+                </div>
+              </div>
+
+              <div class="sec-label"><i class="bi bi-calendar3"></i> Kiralama Detayları</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Alış Tarihi</label>
+                  <input type="date" name="rentDate" id="rentDate" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Teslim Tarihi</label>
+                  <input type="date" name="returnDate" id="returnDate" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                </div>
+              </div>
+
+              <!-- Toplam Ücret Kutusu -->
+              <div class="total-box" id="totalBox">
+                <div class="total-left">
+                  <strong id="totalDays">—</strong> gün &times; &#8378;@Model.DailyPrice.ToString("N0")<br>
+                  <span id="totalDateRange" style="font-size:.78rem;"></span>
+                </div>
+                <div class="total-right">
+                  <div class="total-label">Toplam Ücret</div>
+                  <div class="total-amount">&#8378;<span id="totalAmount">0</span></div>
+                </div>
+              </div>
+
+              <button type="button" class="btn-submit" id="goPayBtn" disabled>
+                <i class="bi bi-credit-card-fill me-2"></i>Ödeme Sayfasına Geç
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ÖDEME MODALI ── -->
+<div class="pay-backdrop" id="payBackdrop">
+  <div class="pay-modal">
+    <div class="pay-modal-header">
+      <h5><i class="bi bi-credit-card-fill me-2"></i>Güvenli Ödeme</h5>
+      <button class="pay-modal-close" id="payClose"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="pay-modal-body">
+
+      <!-- Kart önizleme -->
+      <div class="card-preview">
+        <div class="card-chip"></div>
+        <div class="card-number-preview" id="cardNumPreview">
+          <span>••••</span><span>••••</span><span>••••</span><span id="cardLast4">••••</span>
+        </div>
+        <div class="card-bottom">
+          <div>
+            <div class="card-holder-preview">Kart Sahibi</div>
+            <div class="card-holder-name" id="cardHolderPreview">AD SOYAD</div>
+          </div>
+          <div>
+            <div class="card-expiry-preview">Son Kullanma</div>
+            <div class="card-expiry-val" id="cardExpiryPreview">MM/YY</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tutar özeti -->
+      <div class="pay-summary">
+        <div class="ps-label">Ödenecek Tutar</div>
+        <div class="ps-amount">&#8378;<span id="modalAmount">0</span></div>
+      </div>
+
+      <!-- Form alanları -->
+      <div class="pay-form-group">
+        <label class="pay-label">Kart Numarası</label>
+        <input class="pay-input" id="cardNumber" type="text" maxlength="19" placeholder="0000 0000 0000 0000" autocomplete="cc-number" />
+      </div>
+      <div class="pay-form-group">
+        <label class="pay-label">Kart Üzerindeki Ad Soyad</label>
+        <input class="pay-input" id="cardHolder" type="text" placeholder="AD SOYAD" autocomplete="cc-name" />
+      </div>
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <label class="pay-label">Son Kullanma Tarihi</label>
+          <input class="pay-input" id="cardExpiry" type="text" maxlength="5" placeholder="AA/YY" autocomplete="cc-exp" />
+        </div>
+        <div class="col-6">
+          <label class="pay-label">CVV</label>
+          <input class="pay-input" id="cardCvv" type="password" maxlength="4" placeholder="•••" autocomplete="cc-csc" />
+        </div>
+      </div>
+
+      <button class="btn-pay" id="btnPay">
+        <i class="bi bi-lock-fill me-2"></i>Ödemeyi Tamamla
+      </button>
+
+      <div class="pay-security">
+        <span><i class="bi bi-shield-lock-fill"></i> 256-bit SSL</span>
+        <span><i class="bi bi-patch-check-fill"></i> 3D Secure</span>
+        <span><i class="bi bi-credit-card"></i> Visa / MC</span>
+      </div>
+
+      <!-- Başarı ekranı (JS ile gösterilir) -->
+      <div class="pay-success" id="paySuccess">
+        <div class="success-icon"><i class="bi bi-check-lg"></i></div>
+        <h5>Ödeme Başarılı!</h5>
+        <p>Kiralama işleminiz tamamlanıyor,<br>yönlendiriliyorsunuz…</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+(function(){
+  var dailyPrice = @Model.DailyPrice;
+
+  var rentDateEl   = document.getElementById('rentDate');
+  var returnDateEl = document.getElementById('returnDate');
+  var totalBox     = document.getElementById('totalBox');
+  var totalDays    = document.getElementById('totalDays');
+  var totalDateRange = document.getElementById('totalDateRange');
+  var totalAmount  = document.getElementById('totalAmount');
+  var goPayBtn     = document.getElementById('goPayBtn');
+
+  function fmt(dateStr) {
+    if (!dateStr) return '';
+    var p = dateStr.split('-');
+    return p[2] + '.' + p[1] + '.' + p[0];
+  }
+
+  function calcTotal() {
+    var r = rentDateEl.value;
+    var t = returnDateEl.value;
+    if (!r || !t) { totalBox.classList.remove('visible'); goPayBtn.disabled = true; return; }
+    var d1 = new Date(r), d2 = new Date(t);
+    var diff = Math.round((d2 - d1) / 86400000);
+    if (diff <= 0) { totalBox.classList.remove('visible'); goPayBtn.disabled = true; return; }
+    var total = diff * dailyPrice;
+    totalDays.textContent = diff;
+    totalAmount.textContent = total.toLocaleString('tr-TR');
+    totalDateRange.textContent = fmt(r) + ' – ' + fmt(t);
+    totalBox.classList.add('visible');
+    goPayBtn.disabled = false;
+    document.getElementById('modalAmount').textContent = total.toLocaleString('tr-TR');
+  }
+
+  rentDateEl.addEventListener('change', function(){
+    if (returnDateEl.value && returnDateEl.value < this.value) returnDateEl.value = '';
+    returnDateEl.min = this.value;
+    calcTotal();
+  });
+  returnDateEl.addEventListener('change', calcTotal);
+
+  // Ödeme sayfasına geç butonu
+  goPayBtn.addEventListener('click', function(){
+    var form = document.getElementById('rentForm');
+    // HTML5 validasyonu
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    document.getElementById('payBackdrop').classList.add('open');
+  });
+
+  // Modal kapat
+  document.getElementById('payClose').addEventListener('click', function(){
+    document.getElementById('payBackdrop').classList.remove('open');
+  });
+  document.getElementById('payBackdrop').addEventListener('click', function(e){
+    if (e.target === this) this.classList.remove('open');
+  });
+
+  // Kart numarası formatla
+  document.getElementById('cardNumber').addEventListener('input', function(){
+    var v = this.value.replace(/\D/g,'').slice(0,16);
+    this.value = v.replace(/(.{4})/g,'$1 ').trim();
+    var last4 = v.slice(-4) || '••••';
+    document.getElementById('cardLast4').textContent = last4.length === 4 ? last4 : '••••';
+    // revealed class
+    var preview = document.getElementById('cardNumPreview').querySelectorAll('span');
+    preview[3].classList.toggle('revealed', v.length >= 13);
+  });
+
+  // Kart sahibi
+  document.getElementById('cardHolder').addEventListener('input', function(){
+    document.getElementById('cardHolderPreview').textContent = this.value.toUpperCase() || 'AD SOYAD';
+  });
+
+  // Son kullanma tarihi formatla
+  document.getElementById('cardExpiry').addEventListener('input', function(){
+    var v = this.value.replace(/\D/g,'');
+    if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2,4);
+    this.value = v;
+    document.getElementById('cardExpiryPreview').textContent = v || 'MM/YY';
+  });
+
+  // Ödemeyi tamamla
+  document.getElementById('btnPay').addEventListener('click', function(){
+    var num    = document.getElementById('cardNumber').value.replace(/\s/g,'');
+    var holder = document.getElementById('cardHolder').value.trim();
+    var expiry = document.getElementById('cardExpiry').value;
+    var cvv    = document.getElementById('cardCvv').value;
+
+    if (num.length < 16)   { alert('Geçerli bir kart numarası girin.'); return; }
+    if (!holder)           { alert('Kart sahibinin adını girin.'); return; }
+    if (expiry.length < 5) { alert('Son kullanma tarihini girin.'); return; }
+    if (cvv.length < 3)    { alert('CVV kodunu girin.'); return; }
+
+    var btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-arrow-repeat me-2" style="animation:spin .8s linear infinite;display:inline-block"></i>İşleniyor...';
+
+    // Başarı göster, sonra formu submit et
+    setTimeout(function(){
+      document.querySelector('.pay-modal-body > *:not(#paySuccess)') && null;
+      // Tüm içeriği gizle, başarıyı göster
+      var body = document.querySelector('.pay-modal-body');
+      Array.from(body.children).forEach(function(el){
+        if(el.id !== 'paySuccess') el.style.display = 'none';
+      });
+      document.getElementById('paySuccess').style.display = 'block';
+
+      // Gerçek form submit
+      setTimeout(function(){
+        document.getElementById('rentForm').submit();
+      }, 1800);
+    }, 1400);
+  });
+})();
+</script>
+<style>@@keyframes spin{to{transform:rotate(360deg)}}</style>
+}

@@ -1,0 +1,261 @@
+@model IEnumerable<ArabamCarRental.Models.TransactionViewModel>
+
+@{
+    ViewBag.Title = "Kiralama Kayıtları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var active      = Model.Where(r => r.IsActive).ToList();
+    var completed   = Model.Where(r => !r.IsActive && !r.IsCancelled).ToList();
+    var cancelled   = Model.Where(r => r.IsCancelled).ToList();
+    var totalEarned = completed.Sum(r => r.TotalPrice);
+    var totalActive = active.Sum(r => r.TotalPrice);
+}
+
+@section Styles {
+<style>
+:root { --fire:#d4500a; --amber:#f0a500; --black:#0a0a08; --white:#e8e0d0; --muted:rgba(232,224,208,0.5); }
+.admin-page { background:#0a0a08; min-height:calc(100vh - 120px); padding:2.5rem 0; }
+
+/* Üst bar */
+.page-topbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; }
+.page-topbar h2 { font-family:'Bebas Neue',sans-serif; font-size:2.2rem; letter-spacing:.04em; color:var(--white); margin:0; }
+.btn-back { background:rgba(212,80,10,0.12); border:1px solid rgba(212,80,10,0.25); color:var(--fire); font-size:.85rem; font-weight:600; padding:.5rem 1.1rem; border-radius:9px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:background .2s; }
+.btn-back:hover { background:rgba(212,80,10,0.22); color:var(--fire); }
+
+/* Stat kutular */
+.stat-row { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2rem; }
+.stat-card { background:#1a1a12; border:1px solid rgba(212,80,10,0.15); border-radius:14px; padding:1rem 1.4rem; flex:1; min-width:140px; }
+.stat-card .sv { font-family:'Bebas Neue',sans-serif; font-size:1.9rem; color:var(--white); line-height:1; }
+.stat-card .sl { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
+.stat-card.fire .sv { color:var(--fire); }
+.stat-card.amber .sv { color:var(--amber); }
+.stat-card.green .sv { color:#34d399; }
+
+/* Arama / filtre */
+.filter-bar { display:flex; gap:.8rem; flex-wrap:wrap; margin-bottom:1.5rem; align-items:center; }
+.search-wrap { position:relative; flex:1; min-width:220px; }
+.search-wrap i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--fire); font-size:.9rem; }
+.search-input { background:#1a1a12; border:1px solid rgba(212,80,10,0.2); border-radius:9px; color:var(--white); font-size:.88rem; padding:.55rem .9rem .55rem 2.2rem; width:100%; outline:none; transition:border-color .2s; }
+.search-input:focus { border-color:var(--fire); }
+.search-input::placeholder { color:rgba(232,224,208,0.25); }
+.filter-select { background:#1a1a12; border:1px solid rgba(212,80,10,0.2); border-radius:9px; color:var(--white); font-size:.85rem; padding:.55rem .9rem; outline:none; cursor:pointer; }
+.filter-select option { background:#1a1a12; }
+.result-count { font-size:.8rem; color:var(--muted); white-space:nowrap; align-self:center; }
+
+/* Tablo kartı */
+.table-card { background:#1a1a12; border:1px solid rgba(212,80,10,0.15); border-radius:16px; overflow:hidden; }
+
+.rental-table { width:100%; border-collapse:collapse; }
+.rental-table thead tr { background:linear-gradient(90deg, #1f1410 0%, #1a1a12 100%); border-bottom:1px solid rgba(212,80,10,0.2); }
+.rental-table thead th { padding:.85rem 1rem; font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--fire); font-weight:700; white-space:nowrap; }
+
+.rental-table tbody tr { border-bottom:1px solid rgba(255,255,255,0.04); transition:background .15s; }
+.rental-table tbody tr:last-child { border-bottom:none; }
+.rental-table tbody tr:hover { background:rgba(212,80,10,0.05); }
+.rental-table tbody tr.hidden-row { display:none; }
+
+.rental-table td { padding:.9rem 1rem; vertical-align:middle; font-size:.87rem; color:var(--white); }
+
+/* Hücre stilleri */
+.td-id { font-family:'Bebas Neue',sans-serif; font-size:1rem; color:rgba(232,224,208,0.4); }
+
+.car-cell { display:flex; align-items:center; gap:.8rem; }
+.car-thumb { width:54px; height:38px; border-radius:6px; object-fit:cover; background:#111; flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid rgba(212,80,10,0.15); }
+.car-thumb img { width:100%; height:100%; object-fit:cover; }
+.car-thumb i { font-size:1.1rem; color:rgba(212,80,10,0.3); }
+.car-name { font-weight:600; color:var(--white); }
+
+.cust-cell .cust-name { font-weight:600; color:var(--white); }
+.cust-cell .cust-email { font-size:.75rem; color:var(--muted); margin-top:1px; }
+.cust-cell .cust-phone { font-size:.78rem; color:rgba(240,165,0,0.7); display:flex; align-items:center; gap:3px; margin-top:2px; }
+
+.date-cell .dc-main { font-weight:500; }
+.date-cell .dc-sub  { font-size:.75rem; color:var(--muted); margin-top:1px; }
+
+.days-badge { background:rgba(212,80,10,0.12); border:1px solid rgba(212,80,10,0.2); color:var(--fire); font-size:.75rem; font-weight:700; padding:2px 9px; border-radius:20px; white-space:nowrap; }
+
+.price-cell { font-family:'Bebas Neue',sans-serif; font-size:1.15rem; color:var(--amber); }
+
+.status-dot { display:inline-flex; align-items:center; gap:5px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:3px 10px; border-radius:20px; }
+.status-dot.active    { background:rgba(52,211,153,0.1); color:#34d399; border:1px solid rgba(52,211,153,0.25); }
+.status-dot.past      { background:rgba(100,100,80,0.1);  color:rgba(232,224,208,0.35); border:1px solid rgba(100,100,80,0.2); }
+.status-dot.cancelled { background:rgba(239,68,68,0.1);  color:#ef4444; border:1px solid rgba(239,68,68,0.25); }
+.status-dot.orphan    { background:rgba(156,163,175,0.1); color:#9ca3af; border:1px solid rgba(156,163,175,0.25); }
+.status-dot i { font-size:.55rem; }
+
+.no-results { text-align:center; padding:3rem; color:var(--muted); font-size:.9rem; display:none; }
+.no-results i { display:block; font-size:2.5rem; color:rgba(212,80,10,0.2); margin-bottom:.8rem; }
+
+@@media(max-width:768px){
+  .rental-table thead th:nth-child(5),
+  .rental-table tbody td:nth-child(5) { display:none; }
+}
+@@media(max-width:600px){
+  .rental-table thead th:nth-child(4),
+  .rental-table tbody td:nth-child(4),
+  .rental-table thead th:nth-child(6),
+  .rental-table tbody td:nth-child(6) { display:none; }
+}
+</style>
+}
+
+<div class="admin-page">
+  <div class="container-fluid px-4">
+
+    <div class="page-topbar">
+      <h2><i class="bi bi-table me-2" style="color:var(--fire)"></i>Kiralama Kayıtları</h2>
+      <a href="/Admin/Index" class="btn-back"><i class="bi bi-arrow-left"></i>Araç Listesine Dön</a>
+    </div>
+
+    <!-- İstatistikler -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="sv">@Model.Count()</div>
+        <div class="sl">Toplam Kayıt</div>
+      </div>
+      <div class="stat-card green">
+        <div class="sv">@active.Count</div>
+        <div class="sl">Aktif Kiralama</div>
+      </div>
+      <div class="stat-card fire">
+        <div class="sv">@completed.Count</div>
+        <div class="sl">Tamamlanan</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(239,68,68,0.2)">
+        <div class="sv" style="color:#ef4444">@cancelled.Count</div>
+        <div class="sl">İptal Edilen</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="sv">&#8378;@totalEarned.ToString("N0")</div>
+        <div class="sl">Tamamlanan Gelir</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(52,211,153,0.2)">
+        <div class="sv" style="color:#34d399">&#8378;@totalActive.ToString("N0")</div>
+        <div class="sl">Aktif Kiralama Geliri</div>
+      </div>
+    </div>
+
+    <!-- Arama / filtre -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Araç, müşteri veya e-posta ara…" />
+      </div>
+      <select class="filter-select" id="statusFilter">
+        <option value="all">Tüm Durumlar</option>
+        <option value="active">Aktif</option>
+        <option value="past">Tamamlanan</option>
+        <option value="cancelled">İptal Edilen</option>
+      </select>
+      <span class="result-count" id="resultCount">@Model.Count() kayıt</span>
+    </div>
+
+    <!-- Tablo -->
+    <div class="table-card">
+      <div style="overflow-x:auto">
+        <table class="rental-table" id="rentalTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Araç</th>
+              <th>Müşteri</th>
+              <th>Alış Tarihi</th>
+              <th>Teslim Tarihi</th>
+              <th>Süre</th>
+              <th>Toplam</th>
+              <th>Durum</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            @foreach (var item in Model)
+            {
+              var imgUrl = string.IsNullOrEmpty(item.CarImageUrl) ? null
+                           : (item.CarImageUrl.StartsWith("/") ? item.CarImageUrl : "/Content/CarImages/" + item.CarImageUrl);
+              var statusClass = item.IsCancelled ? "cancelled" : (item.CustomerInfo == "(Silinmiş Müşteri)" ? "orphan" : (item.IsActive ? "active" : "past"));
+              var statusText  = item.IsCancelled ? "İptal" : (item.CustomerInfo == "(Silinmiş Müşteri)" ? "Müşteri Silinmiş" : (item.IsActive ? "Aktif" : "Tamamlandı"));
+              <tr data-search="@(item.CarInfo + " " + item.CustomerInfo + " " + item.CustomerEmail + " " + item.CustomerPhone).ToLower()"
+                  data-status="@statusClass">
+                <td class="td-id">#@item.TransactionID</td>
+                <td>
+                  <div class="car-cell">
+                    <div class="car-thumb">
+                      @if (imgUrl != null)
+                      { <img src="@imgUrl" alt="@item.CarInfo" /> }
+                      else
+                      { <i class="bi bi-car-front-fill"></i> }
+                    </div>
+                    <span class="car-name">@item.CarInfo</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="cust-cell">
+                    <div class="cust-name">@item.CustomerInfo</div>
+                    @if (!string.IsNullOrEmpty(item.CustomerEmail))
+                    { <div class="cust-email"><i class="bi bi-envelope me-1"></i>@item.CustomerEmail</div> }
+                    @if (!string.IsNullOrEmpty(item.CustomerPhone))
+                    { <div class="cust-phone"><i class="bi bi-telephone"></i>@item.CustomerPhone</div> }
+                  </div>
+                </td>
+                <td>
+                  <div class="date-cell">
+                    <div class="dc-main">@item.RentDate.ToString("dd.MM.yyyy")</div>
+                    <div class="dc-sub">@item.RentDate.ToString("dddd", new System.Globalization.CultureInfo("tr-TR"))</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="date-cell">
+                    <div class="dc-main">@item.ReturnDate.ToString("dd.MM.yyyy")</div>
+                    <div class="dc-sub">@item.ReturnDate.ToString("dddd", new System.Globalization.CultureInfo("tr-TR"))</div>
+                  </div>
+                </td>
+                <td><span class="days-badge">@item.TotalDays gün</span></td>
+                <td class="price-cell">&#8378;@item.TotalPrice.ToString("N0")</td>
+                <td>
+                  <span class="status-dot @statusClass">
+                    <i class="bi bi-circle-fill"></i>@statusText
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="no-results" id="noResults">
+          <i class="bi bi-search"></i>Sonuç bulunamadı.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+@section Scripts {
+<script>
+(function(){
+  var searchInput  = document.getElementById('searchInput');
+  var statusFilter = document.getElementById('statusFilter');
+  var rows         = document.querySelectorAll('#tableBody tr');
+  var resultCount  = document.getElementById('resultCount');
+  var noResults    = document.getElementById('noResults');
+
+  function applyFilter() {
+    var q      = searchInput.value.toLowerCase().trim();
+    var status = statusFilter.value;
+    var visible = 0;
+
+    rows.forEach(function(row) {
+      var matchSearch = !q || row.dataset.search.includes(q);
+      var matchStatus = status === 'all' || row.dataset.status === status;
+      var show = matchSearch && matchStatus;
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    resultCount.textContent = visible + ' kayıt';
+    noResults.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  searchInput.addEventListener('input', applyFilter);
+  statusFilter.addEventListener('change', applyFilter);
+})();
+</script>
+}

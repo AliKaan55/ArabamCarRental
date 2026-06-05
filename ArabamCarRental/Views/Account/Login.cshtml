@@ -1,0 +1,259 @@
+@{
+    ViewBag.Title = "Giriş Yap";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Styles {
+<style>
+:root { --fire:#d4500a; --amber:#f0a500; --black:#0a0a08; --white:#e8e0d0; --muted:rgba(232,224,208,0.5); }
+.auth-page { min-height:calc(100vh - 120px); display:flex; align-items:center; background:#0a0a08; padding:2rem 0; position:relative; overflow:hidden; }
+.auth-page::before { content:''; position:absolute; bottom:-10%; right:5%; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle, rgba(212,80,10,0.12) 0%, transparent 65%); pointer-events:none; }
+.auth-card { background:#1a1a12; border:1px solid rgba(212,80,10,0.18); border-radius:20px; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,0.6); display:flex; min-height:480px; position:relative; z-index:1; }
+.auth-left { background:linear-gradient(160deg, #8a2a00 0%, #d4500a 40%, #1a1a12 100%); padding:3rem 2rem; display:flex; flex-direction:column; justify-content:center; color:#fff; min-width:280px; position:relative; overflow:hidden; }
+.auth-left::before { content:''; position:absolute; width:300px; height:300px; background:rgba(240,165,0,0.08); border-radius:50%; top:-80px; right:-90px; }
+.auth-left::after  { content:''; position:absolute; width:200px; height:200px; background:rgba(0,0,0,0.15); border-radius:50%; bottom:-60px; left:-60px; }
+.auth-left h2 { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:.04em; margin-bottom:.7rem; line-height:1.2; position:relative; z-index:1; }
+.auth-left p  { font-size:.87rem; opacity:.85; line-height:1.6; margin-bottom:1.8rem; position:relative; z-index:1; }
+.auth-left .feat { display:flex; align-items:center; gap:9px; font-size:.85rem; margin-bottom:.55rem; opacity:.9; position:relative; z-index:1; }
+.auth-left .feat i { color:var(--amber); }
+.auth-right { padding:2.8rem 2.5rem; display:flex; flex-direction:column; justify-content:center; flex:1; }
+.auth-right h3 { font-family:'Bebas Neue',sans-serif; font-size:1.9rem; color:var(--white); margin-bottom:.3rem; letter-spacing:.04em; }
+.auth-right .sub { color:var(--muted); font-size:.88rem; margin-bottom:1.8rem; }
+.form-floating label { color:rgba(232,224,208,0.4); font-size:.87rem; }
+.form-floating .form-control { background:#111108; border:1.5px solid rgba(212,80,10,0.2); border-radius:10px; height:54px; font-size:.92rem; color:var(--white); transition:border-color .2s,box-shadow .2s; }
+.form-floating .form-control:focus { border-color:var(--fire); box-shadow:0 0 0 3px rgba(212,80,10,0.15); background:#111108; color:var(--white); }
+.form-floating .form-control::placeholder { color:transparent; }
+.auth-link { color:var(--fire); text-decoration:none; font-weight:500; }
+.auth-link:hover { color:var(--amber); }
+.alert-danger { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#f87171; border-radius:10px; font-size:.88rem; }
+@@media(max-width:768px){ .auth-left{display:none;} .auth-card{min-height:auto;} }
+
+/* ── ENGINE START STOP Button ── */
+.btn-engine-wrap { display:flex; justify-content:center; margin-top:.5rem; }
+
+.btn-engine {
+  position:relative;
+  width:160px; height:160px;
+  border-radius:50%; border:none; background:none;
+  cursor:pointer; outline:none;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .12s ease;
+}
+.btn-engine:active { transform:scale(0.95); }
+
+/* Dış kalın mat siyah çerçeve (fotoğraftaki dış halka) */
+.btn-engine .frame-outer {
+  position:absolute; inset:0; border-radius:50%;
+  background:
+    radial-gradient(circle at 40% 30%, #4a4a4a 0%, #2a2a2a 30%, #111 60%, #050505 100%);
+  box-shadow:
+    0 6px 20px rgba(0,0,0,0.9),
+    0 2px 4px rgba(255,255,255,0.04) inset,
+    0 -4px 8px rgba(0,0,0,0.6) inset;
+}
+
+/* Gümüş ince parlak çerçeve halkası */
+.btn-engine .ring-chrome {
+  position:absolute; inset:14px; border-radius:50%;
+  background:transparent;
+  box-shadow:
+    0 0 0 2.5px #888,
+    0 0 0 4px #1a1a1a,
+    0 0 0 5.5px #aaa,
+    inset 0 1px 2px rgba(255,255,255,0.3),
+    inset 0 -1px 2px rgba(0,0,0,0.5);
+}
+
+/* İç mat siyah ana yüzey */
+.btn-engine .core {
+  position:relative; z-index:2;
+  width:118px; height:118px; border-radius:50%;
+  background:
+    radial-gradient(circle at 38% 28%, #3e3e3e 0%, #252525 35%, #181818 65%, #0d0d0d 100%);
+  box-shadow:
+    inset 0 3px 8px rgba(255,255,255,0.07),
+    inset 0 -4px 10px rgba(0,0,0,0.7),
+    0 4px 12px rgba(0,0,0,0.6);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px;
+  transition:background .15s, box-shadow .15s;
+}
+
+/* Üstteki oval LED göstergesi */
+.btn-engine .led-slot {
+  position:absolute;
+  top:18px; left:50%; transform:translateX(-50%);
+  width:22px; height:9px; border-radius:5px;
+  background:#0a0a0a;
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,0.9),
+    0 0 0 1px #555,
+    0 0 0 1.5px #222;
+  z-index:3;
+  transition:box-shadow .2s, background .2s;
+}
+
+/* Yazılar */
+.btn-engine .lbl-engine,
+.btn-engine .lbl-start,
+.btn-engine .lbl-stop {
+  font-family:'Bebas Neue', 'Arial Black', sans-serif;
+  color:#d8d0c0;
+  letter-spacing:.12em;
+  line-height:1;
+  text-shadow:
+    0 1px 0 rgba(0,0,0,0.8),
+    0 -1px 1px rgba(255,255,255,0.1);
+  transition:color .2s;
+}
+.btn-engine .lbl-engine { font-size:.72rem; margin-bottom:1px; }
+.btn-engine .lbl-start  { font-size:.92rem; font-weight:900; }
+.btn-engine .lbl-stop   { font-size:.92rem; font-weight:900; }
+
+/* Hover — hafif parlama */
+.btn-engine:hover .core {
+  background:
+    radial-gradient(circle at 38% 28%, #484838 0%, #2e2e2e 35%, #1e1e1e 65%, #111 100%);
+  box-shadow:
+    inset 0 3px 8px rgba(255,255,255,0.1),
+    inset 0 -4px 10px rgba(0,0,0,0.6),
+    0 4px 16px rgba(0,0,0,0.5);
+}
+.btn-engine:hover .lbl-engine,
+.btn-engine:hover .lbl-start,
+.btn-engine:hover .lbl-stop { color:#fff; }
+.btn-engine:hover .led-slot {
+  background:#0d1a0d;
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,0.7),
+    0 0 0 1px #4a7a4a,
+    0 0 6px rgba(80,200,80,0.3);
+}
+
+/* Basılı — bastırma hissi */
+.btn-engine:active .core {
+  background:
+    radial-gradient(circle at 38% 28%, #2a2a2a 0%, #1a1a1a 35%, #101010 65%, #080808 100%);
+  box-shadow:
+    inset 0 5px 14px rgba(0,0,0,0.9),
+    inset 0 -2px 4px rgba(255,255,255,0.03),
+    0 2px 6px rgba(0,0,0,0.8);
+}
+.btn-engine:active .led-slot {
+  background:#0a1f0a;
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,0.5),
+    0 0 0 1px #3a6a3a,
+    0 0 10px rgba(60,200,60,0.5),
+    0 0 20px rgba(60,180,60,0.2);
+}
+
+/* Loading */
+.btn-engine.loading .ring-chrome {
+  animation:chrome-spin 1.2s linear infinite;
+}
+@@keyframes chrome-spin {
+  to { transform:rotate(360deg); }
+}
+.btn-engine.loading .led-slot {
+  animation:led-blink .6s ease-in-out infinite;
+}
+@@keyframes led-blink {
+  0%,100% { background:#0a1f0a; box-shadow:inset 0 1px 2px rgba(0,0,0,0.5),0 0 0 1px #3a6a3a,0 0 10px rgba(60,200,60,0.5); }
+  50%      { background:#0d2a0d; box-shadow:inset 0 1px 2px rgba(0,0,0,0.5),0 0 0 1px #5aaa5a,0 0 18px rgba(80,220,80,0.7); }
+}
+/* Hata durumu - kirmizi titresim */
+.btn-engine.error .led-slot {
+  animation:led-error .5s ease-in-out infinite;
+}
+.btn-engine.error .lbl-engine,
+.btn-engine.error .lbl-start,
+.btn-engine.error .lbl-stop { color:#f87171; }
+@@keyframes led-error {
+  0%,100% { background:#1f0a0a; box-shadow:inset 0 1px 2px rgba(0,0,0,0.5),0 0 0 1px #7a3a3a,0 0 10px rgba(200,60,60,0.5); }
+  50%      { background:#2a0d0d; box-shadow:inset 0 1px 2px rgba(0,0,0,0.5),0 0 0 1px #aa5a5a,0 0 18px rgba(220,80,80,0.7); }
+}
+</style>
+}
+
+<div class="auth-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-9 col-xl-8">
+        <div class="auth-card">
+          <div class="auth-left">
+            <h2>Hoş Geldiniz!</h2>
+            <p>Hesabınıza girerek premium araç kiralama deneyimini yaşayın.</p>
+            <div class="feat"><i class="bi bi-shield-check-fill"></i> Güvenli &amp; Hızlı</div>
+            <div class="feat"><i class="bi bi-car-front-fill"></i> 500+ Araç Seçeneği</div>
+            <div class="feat"><i class="bi bi-headset"></i> 7/24 Destek</div>
+          </div>
+          <div class="auth-right">
+            <h3>Giriş Yap</h3>
+            <p class="sub">Hesabınız yok mu? <a href="@Url.Action("Register","Account")" class="auth-link">Üye Ol</a></p>
+
+            @if (TempData["ErrorMessage"] != null)
+            { <div class="alert alert-danger mb-3">@TempData["ErrorMessage"]</div> }
+
+            <form action="@Url.Action("Login","Account")" method="post">
+              @Html.AntiForgeryToken()
+              <div class="form-floating mb-3">
+                <input type="email" name="email" class="form-control" id="email" placeholder="email" required />
+                <label for="email"><i class="bi bi-envelope me-1"></i>E-posta</label>
+              </div>
+              <div class="form-floating mb-2">
+                <input type="password" name="password" class="form-control" id="password" placeholder="sifre" required />
+                <label for="password"><i class="bi bi-lock me-1"></i>Şifre</label>
+              </div>
+              <div class="text-end mb-3">
+                <a href="@Url.Action("ForgotPassword","Account")" style="font-size:.82rem; color:var(--fire); text-decoration:none;">
+                  <i class="bi bi-question-circle me-1"></i>Şifremi unuttum
+                </a>
+              </div>
+              <div class="btn-engine-wrap">
+                <button type="submit" class="btn-engine" id="engineBtn" title="Giriş Yap">
+                  <span class="frame-outer"></span>
+                  <span class="ring-chrome"></span>
+                  <span class="led-slot"></span>
+                  <span class="core">
+                    <span class="lbl-engine">ENGINE</span>
+                    <span class="lbl-start">START</span>
+                    <span class="lbl-stop">STOP</span>
+                  </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+@section Scripts {
+<script>
+(function(){
+  var btn = document.getElementById('engineBtn');
+  if(!btn) return;
+
+  var sndFail = new Audio('@Url.Content("~/Content/sounds/engine-fail.wav")');
+
+  var hasError   = document.querySelector('.alert-danger') !== null;
+  var hasSubmitted = sessionStorage.getItem('loginSubmitted');
+
+  if (hasSubmitted) {
+    sessionStorage.removeItem('loginSubmitted');
+    if (hasError) {
+      sndFail.play().catch(function(){});
+      btn.classList.add('error');
+    }
+  }
+
+  btn.closest('form').addEventListener('submit', function(e){
+    e.preventDefault();
+    btn.classList.add('loading');
+    sessionStorage.setItem('loginSubmitted', '1');
+    sessionStorage.setItem('showEngineOverlay', '1');
+    btn.closest('form').submit();
+  });
+})();
+</script>
+}

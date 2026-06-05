@@ -1,0 +1,334 @@
+@model IEnumerable<ArabamCarRental.Models.TransactionViewModel>
+
+@{
+    ViewBag.Title = "Kiralamalarım";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var active  = Model.Where(r => r.IsActive).ToList();
+    var history = Model.Where(r => !r.IsActive).ToList();
+}
+
+@section Styles {
+<style>
+:root { --fire:#d4500a; --amber:#f0a500; --black:#0a0a08; --white:#e8e0d0; --muted:rgba(232,224,208,0.5); }
+
+.my-page { background:#0a0a08; min-height:calc(100vh - 120px); padding:3rem 0; }
+
+/* Üst başlık */
+.my-hero { margin-bottom:2.5rem; }
+.my-hero h2 { font-family:'Bebas Neue',sans-serif; font-size:2.4rem; letter-spacing:.04em; color:var(--white); margin:0 0 .3rem; }
+.my-hero p  { color:var(--muted); font-size:.9rem; margin:0; }
+
+/* Stat kutucukları */
+.stat-row { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2.5rem; }
+.stat-card { background:#1a1a12; border:1px solid rgba(212,80,10,0.18); border-radius:14px; padding:1.1rem 1.5rem; flex:1; min-width:130px; }
+.stat-card .s-val { font-family:'Bebas Neue',sans-serif; font-size:2rem; color:var(--white); line-height:1; }
+.stat-card .s-lbl { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
+.stat-card.accent .s-val { color:var(--amber); }
+
+/* Sekme */
+.tab-row { display:flex; gap:.5rem; margin-bottom:1.8rem; border-bottom:1px solid rgba(212,80,10,0.12); padding-bottom:0; }
+.tab-btn { background:none; border:none; color:var(--muted); font-size:.9rem; font-weight:600; padding:.6rem 1.2rem; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:color .2s, border-color .2s; }
+.tab-btn.active { color:var(--fire); border-bottom-color:var(--fire); }
+.tab-btn .badge-cnt { background:rgba(212,80,10,0.2); color:var(--fire); font-size:.7rem; padding:1px 7px; border-radius:20px; margin-left:5px; }
+.tab-pane { display:none; }
+.tab-pane.active { display:block; }
+
+/* Kiralama kartı */
+.rental-card {
+  background:#1a1a12;
+  border:1px solid rgba(212,80,10,0.15);
+  border-radius:16px;
+  overflow:hidden;
+  margin-bottom:1.2rem;
+  display:flex;
+  transition:border-color .2s, box-shadow .2s;
+}
+.rental-card:hover { border-color:rgba(212,80,10,0.35); box-shadow:0 8px 28px rgba(0,0,0,0.4); }
+.rental-card.active-card { border-color:rgba(240,165,0,0.3); }
+
+.rental-img {
+  width:160px; flex-shrink:0;
+  background:#111108;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.rental-img img { width:100%; height:100%; object-fit:cover; }
+.rental-img .no-img { font-size:2.5rem; color:rgba(212,80,10,0.3); }
+
+.rental-info { padding:1.2rem 1.5rem; flex:1; display:flex; flex-direction:column; justify-content:space-between; }
+
+.rental-top { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
+.rental-car-name { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:var(--white); letter-spacing:.03em; margin-bottom:.2rem; }
+.rental-id { font-size:.72rem; color:rgba(232,224,208,0.25); }
+
+.status-badge {
+  font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+  padding:3px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0;
+}
+.status-active   { background:rgba(240,165,0,0.12); color:var(--amber); border:1px solid rgba(240,165,0,0.3); }
+.status-past     { background:rgba(100,100,80,0.12); color:rgba(232,224,208,0.4); border:1px solid rgba(100,100,80,0.2); }
+
+.rental-meta { display:flex; gap:1.4rem; flex-wrap:wrap; margin-top:.8rem; }
+.rental-meta .meta-item { font-size:.82rem; color:var(--muted); display:flex; align-items:center; gap:5px; }
+.rental-meta .meta-item i { color:var(--fire); font-size:.85rem; }
+.rental-meta .meta-item strong { color:var(--white); }
+
+.rental-bottom { display:flex; align-items:center; justify-content:space-between; margin-top:1rem; flex-wrap:wrap; gap:.8rem; }
+.rental-price { font-family:'Bebas Neue',sans-serif; font-size:1.7rem; color:var(--amber); line-height:1; }
+.rental-price small { font-family:'DM Sans',sans-serif; font-size:.72rem; color:var(--muted); font-weight:400; }
+
+.btn-cancel {
+  background:rgba(248,113,113,0.1);
+  border:1px solid rgba(248,113,113,0.3);
+  color:#f87171; font-size:.82rem; font-weight:600;
+  padding:.45rem 1rem; border-radius:8px;
+  cursor:pointer; transition:background .2s, border-color .2s;
+}
+.btn-cancel:hover { background:rgba(248,113,113,0.2); border-color:rgba(248,113,113,0.5); }
+
+/* Boş durum */
+.empty-state { text-align:center; padding:4rem 2rem; color:var(--muted); }
+.empty-state i { font-size:3rem; color:rgba(212,80,10,0.25); margin-bottom:1rem; display:block; }
+.empty-state p { font-size:.9rem; margin-bottom:1.2rem; }
+.btn-browse { background:var(--fire); color:#fff; font-weight:700; padding:.65rem 1.5rem; border-radius:9px; text-decoration:none; font-size:.9rem; display:inline-flex; align-items:center; gap:7px; transition:background .2s; }
+.btn-browse:hover { background:#b84008; color:#fff; }
+
+/* İptal onay modal */
+.cancel-backdrop {
+  display:none; position:fixed; inset:0; z-index:9000;
+  background:rgba(5,5,3,0.85); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center; padding:1rem;
+}
+.cancel-backdrop.open { display:flex; }
+.cancel-modal {
+  background:#1a1a12; border:1px solid rgba(248,113,113,0.25);
+  border-radius:18px; width:100%; max-width:400px;
+  padding:2rem; text-align:center;
+  box-shadow:0 40px 80px rgba(0,0,0,0.7);
+  animation:pop-in .25s cubic-bezier(.34,1.4,.64,1);
+}
+@@keyframes pop-in { from{opacity:0;transform:scale(.92)} to{opacity:1;transform:none} }
+.cancel-modal .warn-icon { font-size:2.5rem; color:#f87171; margin-bottom:1rem; }
+.cancel-modal h5 { font-family:'Bebas Neue',sans-serif; font-size:1.5rem; color:var(--white); letter-spacing:.04em; margin-bottom:.5rem; }
+.cancel-modal p  { color:var(--muted); font-size:.87rem; line-height:1.6; margin-bottom:1.5rem; }
+.cancel-modal .car-highlight { color:var(--amber); font-weight:600; }
+.modal-btns { display:flex; gap:.8rem; }
+.btn-modal-cancel { flex:1; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#f87171; font-weight:700; padding:.7rem; border-radius:9px; cursor:pointer; transition:background .2s; }
+.btn-modal-cancel:hover { background:rgba(248,113,113,0.22); }
+.btn-modal-keep   { flex:1; background:#2a2a1a; border:1px solid rgba(232,224,208,0.12); color:var(--muted); font-weight:600; padding:.7rem; border-radius:9px; cursor:pointer; transition:background .2s; }
+.btn-modal-keep:hover { background:#333320; color:var(--white); }
+
+/* Responsive */
+@@media(max-width:600px){
+  .rental-card { flex-direction:column; }
+  .rental-img { width:100%; height:160px; }
+  .rental-top { flex-direction:column; gap:.5rem; }
+}
+</style>
+}
+
+<div class="my-page">
+  <div class="container">
+
+    @if (TempData["SuccessMessage"] != null)
+    { <div class="alert alert-success mb-3" style="background:rgba(0,180,70,.1);border:1px solid rgba(0,180,70,.3);color:#34d399;border-radius:10px;font-size:.88rem;">@TempData["SuccessMessage"]</div> }
+    @if (TempData["ErrorMessage"] != null)
+    { <div class="alert alert-danger mb-3" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171;border-radius:10px;font-size:.88rem;">@TempData["ErrorMessage"]</div> }
+
+    <div class="my-hero">
+      <h2><i class="bi bi-journal-text me-2" style="color:var(--fire)"></i>Kiralamalarım</h2>
+      <p>Tüm kiralama geçmişinizi ve aktif kiralamalarınızı buradan yönetin.</p>
+    </div>
+
+    <!-- İstatistikler -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="s-val">@Model.Count()</div>
+        <div class="s-lbl">Toplam Kiralama</div>
+      </div>
+      <div class="stat-card accent">
+        <div class="s-val">@active.Count</div>
+        <div class="s-lbl">Aktif Kiralama</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-val">@history.Count</div>
+        <div class="s-lbl">Geçmiş Kiralama</div>
+      </div>
+      <div class="stat-card accent">
+        <div class="s-val">&#8378;@Model.Sum(r => r.TotalPrice).ToString("N0")</div>
+        <div class="s-lbl">Toplam Harcama</div>
+      </div>
+    </div>
+
+    <!-- Sekmeler -->
+    <div class="tab-row">
+      <button class="tab-btn active" data-tab="active">
+        <i class="bi bi-car-front-fill me-1"></i>Aktif
+        <span class="badge-cnt">@active.Count</span>
+      </button>
+      <button class="tab-btn" data-tab="history">
+        <i class="bi bi-clock-history me-1"></i>Geçmiş
+        <span class="badge-cnt">@history.Count</span>
+      </button>
+    </div>
+
+    <!-- Aktif Kiralamalar -->
+    <div class="tab-pane active" id="tab-active">
+      @if (!active.Any())
+      {
+        <div class="empty-state">
+          <i class="bi bi-car-front"></i>
+          <p>Şu an aktif bir kiralama bulunmuyor.</p>
+          <a href="@Url.Action("Index","Car")" class="btn-browse"><i style="color:white" class="bi bi-search"></i>Araçlara Göz At</a>
+        </div>
+      }
+      else
+      {
+        foreach (var r in active)
+        {
+          var imgUrl = string.IsNullOrEmpty(r.CarImageUrl) ? null
+                       : (r.CarImageUrl.StartsWith("/") ? r.CarImageUrl : "/Content/CarImages/" + r.CarImageUrl);
+          var daysLeft = (r.ReturnDate.Date - DateTime.Today).Days;
+          <div class="rental-card active-card">
+            <div class="rental-img">
+              @if (imgUrl != null)
+              { <img src="@imgUrl" alt="@r.CarInfo" /> }
+              else
+              { <i class="bi bi-car-front-fill no-img"></i> }
+            </div>
+            <div class="rental-info">
+              <div>
+                <div class="rental-top">
+                  <div>
+                    <div class="rental-car-name">@r.CarInfo</div>
+                    <div class="rental-id">#@r.TransactionID</div>
+                  </div>
+                  <span class="status-badge status-active">
+                    <i class="bi bi-circle-fill me-1" style="font-size:.55rem"></i>Aktif
+                  </span>
+                </div>
+                <div class="rental-meta">
+                  <div class="meta-item"><i class="bi bi-calendar-check"></i> Alış: <strong>@r.RentDate.ToString("dd.MM.yyyy")</strong></div>
+                  <div class="meta-item"><i class="bi bi-calendar-x"></i> Teslim: <strong>@r.ReturnDate.ToString("dd.MM.yyyy")</strong></div>
+                  <div class="meta-item"><i class="bi bi-clock"></i> <strong>@r.TotalDays gün</strong></div>
+                  @if (daysLeft >= 0)
+                  { <div class="meta-item" style="color:var(--amber)"><i class="bi bi-hourglass-split"></i> <strong>@daysLeft gün kaldı</strong></div> }
+                </div>
+              </div>
+              <div class="rental-bottom">
+                <div>
+                  <div class="rental-price">&#8378;@r.TotalPrice.ToString("N0") <small>toplam</small></div>
+                </div>
+                <button class="btn-cancel"
+                        data-tid="@r.TransactionID"
+                        data-car="@r.CarInfo"
+                        onclick="openCancel(this)">
+                  <i class="bi bi-x-circle me-1"></i>İptal Et
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Geçmiş Kiralamalar -->
+    <div class="tab-pane" id="tab-history">
+      @if (!history.Any())
+      {
+        <div class="empty-state">
+          <i class="bi bi-clock-history"></i>
+          <p>Henüz tamamlanmış bir kiralama bulunmuyor.</p>
+        </div>
+      }
+      else
+      {
+        foreach (var r in history)
+        {
+          var imgUrl = string.IsNullOrEmpty(r.CarImageUrl) ? null
+                       : (r.CarImageUrl.StartsWith("/") ? r.CarImageUrl : "/Content/CarImages/" + r.CarImageUrl);
+          <div class="rental-card">
+            <div class="rental-img">
+              @if (imgUrl != null)
+              { <img src="@imgUrl" alt="@r.CarInfo" /> }
+              else
+              { <i class="bi bi-car-front-fill no-img"></i> }
+            </div>
+            <div class="rental-info">
+              <div>
+                <div class="rental-top">
+                  <div>
+                    <div class="rental-car-name">@r.CarInfo</div>
+                    <div class="rental-id">#@r.TransactionID</div>
+                  </div>
+                  <span class="status-badge status-past">Tamamlandı</span>
+                </div>
+                <div class="rental-meta">
+                  <div class="meta-item"><i class="bi bi-calendar-check"></i> Alış: <strong>@r.RentDate.ToString("dd.MM.yyyy")</strong></div>
+                  <div class="meta-item"><i class="bi bi-calendar-x"></i> Teslim: <strong>@r.ReturnDate.ToString("dd.MM.yyyy")</strong></div>
+                  <div class="meta-item"><i class="bi bi-clock"></i> <strong>@r.TotalDays gün</strong></div>
+                </div>
+              </div>
+              <div class="rental-bottom">
+                <div class="rental-price">&#8378;@r.TotalPrice.ToString("N0") <small>toplam</small></div>
+                <a href="@Url.Action("Index","Car")" class="btn-browse" style="padding:.4rem 1rem;font-size:.8rem;">
+                  <i class="bi bi-arrow-repeat"></i>Tekrar Kirala
+                </a>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+  </div>
+</div>
+
+<!-- İptal Onay Modalı -->
+<div class="cancel-backdrop" id="cancelBackdrop">
+  <div class="cancel-modal">
+    <div class="warn-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+    <h5>Kiralama İptal</h5>
+    <p>
+      <span class="car-highlight" id="cancelCarName"></span> aracına ait kiralamanızı
+      iptal etmek istediğinize emin misiniz?<br>
+      <small style="color:rgba(232,224,208,0.3)">Bu işlem geri alınamaz.</small>
+    </p>
+    <form method="post" action="@Url.Action("CancelRental","Account")" id="cancelForm">
+      @Html.AntiForgeryToken()
+      <input type="hidden" name="transactionId" id="cancelTid" />
+      <div class="modal-btns">
+        <button type="submit" class="btn-modal-cancel"><i class="bi bi-x-circle me-1"></i>İptal Et</button>
+        <button type="button" class="btn-modal-keep" onclick="closeCancel()">Vazgeç</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+  // Sekme geçişi
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      document.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('active'); });
+      this.classList.add('active');
+      document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+    });
+  });
+
+  // İptal modal
+  function openCancel(btn) {
+    document.getElementById('cancelTid').value  = btn.dataset.tid;
+    document.getElementById('cancelCarName').textContent = btn.dataset.car;
+    document.getElementById('cancelBackdrop').classList.add('open');
+  }
+  function closeCancel() {
+    document.getElementById('cancelBackdrop').classList.remove('open');
+  }
+  document.getElementById('cancelBackdrop').addEventListener('click', function(e){
+    if (e.target === this) closeCancel();
+  });
+</script>
+}

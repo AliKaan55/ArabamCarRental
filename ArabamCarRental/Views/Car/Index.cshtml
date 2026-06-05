@@ -1,0 +1,557 @@
+@model IEnumerable<ArabamCarRental.Models.Car>
+
+@{
+    ViewBag.Title = "Kiralık Araç Filomuz";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string currentVites = ViewBag.CurrentVites as string ?? "";
+    string currentYakit = ViewBag.CurrentYakit as string ?? "";
+    string currentBrand = ViewBag.CurrentBrand as string ?? "";
+    var brands = ViewBag.Brands as List<string> ?? new List<string>();
+
+    var specMap = new System.Collections.Generic.Dictionary<int, string[]>();
+    foreach (var c in Model)
+    {
+        var sp = (c.TechnicalSpecs ?? "").ToLower();
+        string vb = sp.Contains("otomatik") ? "Otomatik" : (sp.Contains("manuel") ? "Manuel" : null);
+        string yb = sp.Contains("elektrik") ? "Elektrikli" :
+                    sp.Contains("hibrit") ? "Hibrit" :
+                    (sp.Contains("dizel") && sp.Contains("benzin")) ? "BenzinliDizel" :
+                    sp.Contains("dizel") ? "Dizel" :
+                    sp.Contains("benzin") ? "Benzinli" : null;
+        var kmm = System.Text.RegularExpressions.Regex.Match(sp, @"(\d+)\s*km");
+        string kb = kmm.Success ? "Günlük " + kmm.Groups[1].Value + " km" : null;
+        specMap[c.CarID] = new string[] { vb, yb, kb };
+    }
+}
+
+@section Styles {
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --fire:  #d4500a;
+    --amber: #f0a500;
+    --black: #0a0a08;
+    --white: #e8e0d0;
+    --muted: rgba(232,224,208,0.5);
+    --card-bg: #131310;
+    --card-border: rgba(212,80,10,0.15);
+}
+
+.cars-page {
+    background: var(--black);
+    min-height: 100vh;
+    padding-bottom: 5rem;
+}
+
+/* ── FİLTRE BÖLÜMÜ ── */
+.filter-bar {
+    background: rgba(10,10,8,0.96);
+    border-bottom: 1px solid rgba(212,80,10,0.2);
+    padding: 1.1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+.filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+/* Vites checkbox grubu */
+.filter-box {
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(212,80,10,0.2);
+    border-radius: 10px;
+    padding: .5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    color: var(--white);
+    transition: border-color .2s;
+}
+.filter-box:focus-within { border-color: var(--fire); }
+.filter-box-label {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    margin-right: 2px;
+    white-space: nowrap;
+}
+.filter-box .form-check {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+.filter-box .form-check-input {
+    width: 16px; height: 16px;
+    border: 1.5px solid rgba(212,80,10,0.4);
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0;
+    accent-color: var(--fire);
+    background: transparent;
+}
+.filter-box .form-check-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .87rem;
+    cursor: pointer;
+    color: var(--white);
+    font-weight: 500;
+}
+
+/* Select kutusu */
+.filter-select-wrap {
+    position: relative;
+    min-width: 160px;
+}
+.filter-select-label {
+    position: absolute;
+    top: -9px; left: 12px;
+    background: #0a0a08;
+    padding: 0 4px;
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--fire);
+    font-family: 'DM Sans', sans-serif;
+    pointer-events: none;
+    z-index: 1;
+}
+.filter-select {
+    width: 100%;
+    height: 44px;
+    border: 1.5px solid rgba(212,80,10,0.2);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    color: var(--white);
+    padding: 0 2.2rem 0 .9rem;
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(255,255,255,0.04) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23d4500a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+    cursor: pointer;
+    transition: border-color .2s;
+}
+.filter-select:focus { outline: none; border-color: var(--fire); box-shadow: 0 0 0 3px rgba(212,80,10,0.12); }
+.filter-select option { background: #1a1a12; color: var(--white); }
+
+/* Butonlar */
+.btn-filter-apply {
+    height: 44px;
+    background: var(--fire);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0 1.6rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: .88rem;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+    white-space: nowrap;
+}
+.btn-filter-apply:hover { background: #b84008; transform: translateY(-1px); }
+
+.btn-filter-clear {
+    height: 44px;
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid rgba(212,80,10,0.2);
+    border-radius: 10px;
+    padding: 0 1.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: border-color .2s, color .2s;
+    white-space: nowrap;
+}
+.btn-filter-clear:hover { border-color: var(--fire); color: var(--white); }
+
+/* Aktif filtre badge */
+.active-filter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(212,80,10,0.1);
+    color: var(--amber);
+    border: 1px solid rgba(212,80,10,0.3);
+    border-radius: 20px;
+    padding: 3px 10px 3px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .78rem;
+    font-weight: 600;
+}
+.active-filter-badge a { color: var(--fire); text-decoration: none; font-size: .85rem; line-height: 1; opacity: .7; }
+.active-filter-badge a:hover { opacity: 1; }
+
+/* ── SAYFA BAŞLIĞI ── */
+.cars-header { padding: 2.8rem 0 1.8rem; }
+.cars-header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: .3rem;
+}
+.cars-header h1 span { color: var(--fire); }
+.cars-header p { font-family: 'DM Sans', sans-serif; color: var(--muted); font-size: .92rem; }
+.result-count {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .82rem;
+    color: var(--muted);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(212,80,10,0.15);
+    border-radius: 20px;
+    padding: 5px 16px;
+}
+
+/* ── ARAÇ KARTI ── */
+.car-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: box-shadow .25s, transform .25s, border-color .25s;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px solid var(--card-border);
+}
+.car-card:hover {
+    box-shadow: 0 20px 60px rgba(212,80,10,0.15), 0 4px 20px rgba(0,0,0,0.5);
+    transform: translateY(-5px);
+    border-color: rgba(212,80,10,0.4);
+}
+
+.car-img-wrap {
+    position: relative;
+    height: 210px;
+    background: linear-gradient(135deg, #1a1a12, #111108);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.car-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+.car-card:hover .car-img-wrap img { transform: scale(1.06); }
+.car-img-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: rgba(212,80,10,0.25);
+}
+.car-img-placeholder i { font-size: 3.5rem; }
+.car-img-placeholder span { font-family: 'DM Sans', sans-serif; font-size: .75rem; color: var(--muted); }
+
+/* Gradient overlay on image */
+.car-img-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: linear-gradient(to top, rgba(19,19,16,0.7), transparent);
+    pointer-events: none;
+}
+
+.badge-status {
+    position: absolute; top: 12px; right: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: .72rem; font-weight: 700;
+    padding: 5px 12px; border-radius: 20px;
+    z-index: 1;
+}
+.badge-avail   { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+.badge-unavail { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+
+.car-body { padding: 1.4rem 1.5rem 1.6rem; flex: 1; display: flex; flex-direction: column; }
+.car-brand {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--fire);
+    margin-bottom: 2px;
+}
+.car-model {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.65rem;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: .6rem;
+}
+
+.car-mini-specs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.2rem; }
+.car-mini-spec {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem;
+    color: var(--muted);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(212,80,10,0.12);
+    border-radius: 6px;
+    padding: 3px 9px;
+}
+.car-mini-spec i { font-size: .9rem; color: var(--fire); opacity: .7; }
+
+.car-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(212,80,10,0.12);
+    margin-top: auto;
+}
+.car-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--amber);
+    line-height: 1;
+}
+.car-price small {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .7rem;
+    color: var(--muted);
+    font-weight: 400;
+    display: block;
+}
+.btn-detail {
+    background: var(--fire);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: .82rem;
+    padding: .6rem 1.4rem;
+    border-radius: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .2s, transform .15s;
+}
+.btn-detail:hover { background: #b84008; color: #fff; transform: translateY(-1px); }
+.btn-detail.disabled {
+    background: rgba(255,255,255,0.05);
+    color: rgba(232,224,208,0.2);
+    border: 1px solid rgba(255,255,255,0.06);
+    pointer-events: none;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 5rem 1rem;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+}
+.empty-state i { font-size: 4rem; display: block; margin-bottom: 1rem; color: rgba(212,80,10,0.2); }
+
+@@media (max-width:768px) {
+    .filter-group { gap: 8px; }
+    .filter-select-wrap { min-width: calc(50% - 8px); }
+}
+</style>
+}
+
+<div class="cars-page">
+
+  <!-- FİLTRE -->
+  <div class="filter-bar">
+    <div class="container">
+      <form action="/Car/Index" method="get" id="filterForm">
+        <div class="filter-group">
+
+          <!-- Vites -->
+          <div class="filter-box">
+            <span class="filter-box-label">Vites</span>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="vites" value="Otomatik" id="chkOto"
+                @(currentVites == "Otomatik" ? "checked" : "") onchange="handleVitesChange(this)" />
+              <label class="form-check-label" for="chkOto">Otomatik</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="vites" value="Manuel" id="chkMan"
+                @(currentVites == "Manuel" ? "checked" : "") onchange="handleVitesChange(this)" />
+              <label class="form-check-label" for="chkMan">Manuel</label>
+            </div>
+          </div>
+
+          <!-- Yakıt -->
+          <div class="filter-select-wrap">
+            <span class="filter-select-label">Yakıt</span>
+            <select name="yakit" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+              <option value="">Tümü</option>
+              <option value="BenzinliDizel" @(currentYakit == "BenzinliDizel" ? "selected" : "")>Benzinli / Dizel</option>
+              <option value="Benzin"        @(currentYakit == "Benzin"        ? "selected" : "")>Benzinli</option>
+              <option value="Elektrik"      @(currentYakit == "Elektrik"      ? "selected" : "")>Elektrikli</option>
+              <option value="Hibrit"        @(currentYakit == "Hibrit"        ? "selected" : "")>Hibrit</option>
+              <option value="Dizel"         @(currentYakit == "Dizel"         ? "selected" : "")>Dizel</option>
+            </select>
+          </div>
+
+          <!-- Marka (dropdown) -->
+          <div class="filter-select-wrap">
+            <span class="filter-select-label">Marka</span>
+            <select name="searchBrand" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+              <option value="">Tüm Markalar</option>
+              @foreach (var b in brands)
+              {
+                <option value="@b" @(currentBrand == b ? "selected" : "")>@b</option>
+              }
+            </select>
+          </div>
+
+          <button type="submit" class="btn-filter-apply">
+            <i class="bi bi-funnel-fill me-1"></i> Filtrele
+          </button>
+          <a href="/Car/Index" class="btn-filter-clear">
+            <i class="bi bi-x"></i> Temizle
+          </a>
+
+        </div>
+
+        <!-- Aktif filtre badge'leri -->
+        @if (!string.IsNullOrEmpty(currentVites) || !string.IsNullOrEmpty(currentYakit) || !string.IsNullOrEmpty(currentBrand))
+        {
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            @if (!string.IsNullOrEmpty(currentVites))
+            {
+              <span class="active-filter-badge">Vites: @currentVites <a href="/Car/Index?yakit=@currentYakit&searchBrand=@currentBrand">&times;</a></span>
+            }
+            @if (!string.IsNullOrEmpty(currentYakit))
+            {
+              <span class="active-filter-badge">Yakıt: @currentYakit <a href="/Car/Index?vites=@currentVites&searchBrand=@currentBrand">&times;</a></span>
+            }
+            @if (!string.IsNullOrEmpty(currentBrand))
+            {
+              <span class="active-filter-badge">Marka: @currentBrand <a href="/Car/Index?vites=@currentVites&yakit=@currentYakit">&times;</a></span>
+            }
+          </div>
+        }
+
+      </form>
+    </div>
+  </div>
+
+  <!-- BAŞLIK -->
+  <div class="cars-header">
+    <div class="container">
+      <div class="d-flex align-items-end justify-content-between flex-wrap gap-2">
+        <div>
+          <h1>Tüm <span>Araçlar</span></h1>
+          <p>Dilediğiniz aracı seçin, kiralama işleminizi tamamlayın.</p>
+        </div>
+        <span class="result-count">@Model.Count() araç listeleniyor</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KARTLAR -->
+  <div class="container">
+    @if (!Model.Any())
+    {
+      <div class="empty-state">
+        <i class="bi bi-car-front"></i>
+        <p>Kriterlere uygun araç bulunamadı.</p>
+        <a href="/Car/Index" class="btn-filter-apply" style="display:inline-block;margin-top:.5rem;">Tüm Araçları Göster</a>
+      </div>
+    }
+    else
+    {
+      <div class="row g-4">
+        @foreach (var car in Model)
+        {
+          <div class="col-xl-4 col-md-6">
+            <div class="car-card">
+
+              <div class="car-img-wrap">
+                @{
+                  var correctedUrl = ArabamCarRental.Services.CarService.GetCorrectImageUrl(car.Brand, car.Model, car.ImageUrl);
+                }
+                @if (!string.IsNullOrEmpty(correctedUrl))
+                {
+                  <img src="@correctedUrl" alt="@car.Brand @car.Model" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                  <div class="car-img-placeholder" style="display:none;">
+                    <i class="bi bi-car-front-fill"></i>
+                    <span>@car.Brand @car.Model</span>
+                  </div>
+                }
+                else
+                {
+                  <div class="car-img-placeholder">
+                    <i class="bi bi-car-front-fill"></i>
+                    <span>@car.Brand @car.Model</span>
+                  </div>
+                }
+                <span class="badge-status @(car.IsAvailable ? "badge-avail" : "badge-unavail")">
+                  @(car.IsAvailable ? "● Müsait" : "● Dolu")
+                </span>
+              </div>
+
+              <div class="car-body">
+                <div class="car-brand">@car.Brand</div>
+                <div class="car-model">@car.Model</div>
+
+                <div class="car-mini-specs">
+                  @if (specMap[car.CarID][0] != null)
+                  {
+                    <span class="car-mini-spec"><i class="bi bi-sliders2"></i> @specMap[car.CarID][0]</span>
+                  }
+                  @if (specMap[car.CarID][1] != null)
+                  {
+                    <span class="car-mini-spec"><i class="bi bi-fuel-pump"></i> @specMap[car.CarID][1]</span>
+                  }
+                  @if (specMap[car.CarID][2] != null)
+                  {
+                    <span class="car-mini-spec"><i class="bi bi-speedometer2"></i> @specMap[car.CarID][2]</span>
+                  }
+                </div>
+
+                <div class="car-footer">
+                  <div class="car-price">
+                    &#8378;@car.DailyPrice.ToString("N0")
+                    <small>/ gün</small>
+                  </div>
+                  <a href="/Car/Details/@car.CarID" class="btn-detail @(!car.IsAvailable ? "disabled" : "")">
+                    Detay Gör
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+</div>
+
+@section Scripts {
+<script>
+function handleVitesChange(el) {
+    if (!el.checked) return;
+    document.querySelectorAll('input[name="vites"]').forEach(function(cb) {
+        if (cb !== el) cb.checked = false;
+    });
+    document.getElementById('filterForm').submit();
+}
+</script>
+}

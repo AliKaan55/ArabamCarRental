@@ -1,0 +1,312 @@
+@{
+    ViewBag.Title = "Üye Ol";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Styles {
+<style>
+:root { --fire:#d4500a; --amber:#f0a500; --black:#0a0a08; --white:#e8e0d0; --muted:rgba(232,224,208,0.5); }
+.auth-page { min-height:calc(100vh - 120px); display:flex; align-items:center; background:#0a0a08; padding:2rem 0; position:relative; overflow:hidden; }
+.auth-page::before { content:''; position:absolute; top:-5%; left:5%; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle,rgba(212,80,10,0.1) 0%,transparent 65%); pointer-events:none; }
+.auth-card { background:#1a1a12; border:1px solid rgba(212,80,10,0.18); border-radius:20px; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,0.6); position:relative; z-index:1; }
+.auth-header { background:linear-gradient(135deg, #8a2a00 0%, #d4500a 100%); padding:2rem 2.5rem; color:#fff; display:flex; align-items:center; gap:1rem; }
+.auth-header .hicon { width:52px; height:52px; background:rgba(255,255,255,.12); border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
+.auth-header h2 { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:.04em; margin:0 0 .2rem; }
+.auth-header p  { font-size:.85rem; opacity:.85; margin:0; }
+.auth-body { padding:2rem 2.5rem 2.5rem; }
+.sec-label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--fire); margin-bottom:.9rem; display:flex; align-items:center; gap:7px; }
+.sec-label::after { content:''; flex:1; height:1px; background:rgba(212,80,10,0.15); }
+.form-floating label { color:rgba(232,224,208,0.4); font-size:.87rem; }
+.form-floating .form-control { background:#111108; border:1.5px solid rgba(212,80,10,0.2); border-radius:10px; height:54px; font-size:.92rem; color:var(--white); transition:border-color .2s,box-shadow .2s; }
+.form-floating .form-control:focus { border-color:var(--fire); box-shadow:0 0 0 3px rgba(212,80,10,0.15); background:#111108; color:var(--white); }
+.form-floating .form-control::placeholder { color:transparent; }
+.auth-link { color:var(--fire); text-decoration:none; font-weight:500; }
+.auth-link:hover { color:var(--amber); }
+.hint-text { font-size:.82rem; color:var(--muted); margin-top:1.2rem; text-align:center; }
+.alert-danger { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#f87171; border-radius:10px; font-size:.88rem; }
+
+/* ── Kapı Kilidi Butonu ── */
+.btn-unlock-wrap { display:flex; justify-content:center; margin-top:.5rem; }
+
+.btn-unlock {
+  position:relative;
+  width:200px; height:64px;
+  border:none; background:none;
+  cursor:pointer; outline:none;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .1s ease;
+}
+.btn-unlock:active { transform:scale(0.97); }
+
+/* Ana gövde — araç kapı kilidi kasası */
+.btn-unlock .lock-body {
+  position:relative; z-index:2;
+  width:200px; height:64px;
+  border-radius:14px;
+  background: linear-gradient(160deg, #2e2e2e 0%, #1a1a1a 40%, #111 100%);
+  box-shadow:
+    0 0 0 1.5px #555,
+    0 0 0 3px #1a1a1a,
+    0 0 0 4px #3a3a3a,
+    0 4px 18px rgba(0,0,0,0.8),
+    inset 0 1px 3px rgba(255,255,255,0.07),
+    inset 0 -2px 6px rgba(0,0,0,0.6);
+  display:flex; align-items:center; justify-content:center; gap:14px;
+  padding:0 20px;
+  overflow:hidden;
+  transition:box-shadow .2s, background .2s;
+}
+
+/* Kilit ikonu SVG wrapper */
+.btn-unlock .lock-icon-wrap {
+  flex-shrink:0;
+  width:32px; height:32px;
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+}
+
+/* Kilit gövdesi */
+.lock-svg { overflow:visible; }
+.lock-body-rect {
+  fill:#2a2a2a;
+  stroke:#888; stroke-width:1.5;
+  rx:4;
+  transition:fill .2s;
+}
+.lock-shackle {
+  fill:none; stroke:#aaa; stroke-width:2; stroke-linecap:round;
+  transform-origin:16px 13px;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1), stroke .2s;
+}
+/* Kilit deliği */
+.lock-hole {
+  fill:#888;
+  transition:fill .2s;
+}
+
+/* Yazı alanı */
+.lock-text-wrap {
+  display:flex; flex-direction:column; align-items:flex-start; gap:1px;
+  flex:1;
+}
+.lock-label-top {
+  font-family:'Bebas Neue', 'Arial Black', sans-serif;
+  font-size:.6rem; letter-spacing:.2em;
+  color:rgba(212,80,10,0.7);
+  line-height:1;
+  transition:color .2s;
+}
+.lock-label-main {
+  font-family:'Bebas Neue', 'Arial Black', sans-serif;
+  font-size:1.05rem; letter-spacing:.1em;
+  color:#ccc;
+  line-height:1;
+  transition:color .2s;
+}
+
+/* LED göstergesi — sağ tarafta */
+.lock-led {
+  width:8px; height:8px; border-radius:50%;
+  background:#1a0a0a;
+  box-shadow: 0 0 0 1.5px #333, inset 0 1px 2px rgba(0,0,0,0.8);
+  flex-shrink:0;
+  transition:background .25s, box-shadow .25s;
+  animation:led-idle 3s ease-in-out infinite;
+}
+@@keyframes led-idle {
+  0%,80%,100% { background:#1a0a0a; box-shadow:0 0 0 1.5px #333, inset 0 1px 2px rgba(0,0,0,0.8); }
+  85%          { background:#8a1a00; box-shadow:0 0 0 1.5px #555, 0 0 6px rgba(212,80,10,0.5); }
+}
+
+/* Hover — kilit açılmaya başlıyor */
+.btn-unlock:hover .lock-body {
+  background: linear-gradient(160deg, #3a3a2a 0%, #222218 40%, #181812 100%);
+  box-shadow:
+    0 0 0 1.5px #777,
+    0 0 0 3px #1a1a1a,
+    0 0 0 4px #555,
+    0 6px 24px rgba(0,0,0,0.7),
+    0 0 20px rgba(212,80,10,0.12),
+    inset 0 1px 3px rgba(255,255,255,0.09),
+    inset 0 -2px 6px rgba(0,0,0,0.5);
+}
+.btn-unlock:hover .lock-shackle {
+  transform: translateY(-5px) rotate(-25deg);
+  stroke:#f0a500;
+}
+.btn-unlock:hover .lock-body-rect { fill:#303028; }
+.btn-unlock:hover .lock-hole { fill:#f0a500; }
+.btn-unlock:hover .lock-label-top { color:var(--amber); }
+.btn-unlock:hover .lock-label-main { color:#fff; }
+.btn-unlock:hover .lock-led {
+  background:#00aa44;
+  box-shadow:0 0 0 1.5px #00aa44, 0 0 8px rgba(0,180,70,0.6), 0 0 16px rgba(0,180,70,0.3);
+  animation:none;
+}
+
+/* Basılı — tam açık */
+.btn-unlock:active .lock-shackle {
+  transform:translateY(-8px) rotate(-40deg);
+  stroke:#fff;
+}
+.btn-unlock:active .lock-body {
+  box-shadow:
+    0 0 0 1.5px #888,
+    0 0 0 3px #1a1a1a,
+    0 0 0 4px #666,
+    0 2px 8px rgba(0,0,0,0.9),
+    0 0 30px rgba(0,180,70,0.2),
+    inset 0 3px 8px rgba(0,0,0,0.7);
+}
+
+/* Loading — kilid açık kaldı, LED yanıp sönüyor */
+.btn-unlock.loading .lock-shackle {
+  transform:translateY(-8px) rotate(-40deg);
+  stroke:#f0a500;
+  animation:shackle-sway .8s ease-in-out infinite;
+}
+@@keyframes shackle-sway {
+  0%,100% { transform:translateY(-8px) rotate(-40deg); }
+  50%      { transform:translateY(-9px) rotate(-45deg); }
+}
+.btn-unlock.loading .lock-led {
+  background:#f0a500;
+  animation:led-loading .5s ease-in-out infinite;
+}
+@@keyframes led-loading {
+  0%,100% { box-shadow:0 0 0 1.5px #c88000, 0 0 6px rgba(240,165,0,0.5); }
+  50%      { box-shadow:0 0 0 1.5px #f0a500, 0 0 14px rgba(240,165,0,0.8); }
+}
+.btn-unlock.loading .lock-label-main { color:#f0a500; }
+
+/* Hata durumu — kırmızı titreşim */
+.btn-unlock.error .lock-led {
+  animation:led-unlock-error .5s ease-in-out infinite;
+}
+.btn-unlock.error .lock-shackle { stroke:#f87171; }
+.btn-unlock.error .lock-label-top,
+.btn-unlock.error .lock-label-main { color:#f87171; }
+@@keyframes led-unlock-error {
+  0%,100% { background:#1f0a0a; box-shadow:0 0 0 1.5px #7a3a3a, 0 0 6px rgba(200,60,60,0.5); }
+  50%      { background:#2a0d0d; box-shadow:0 0 0 1.5px #aa5a5a, 0 0 14px rgba(220,80,80,0.7); }
+}
+</style>
+}
+
+<div class="auth-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-7">
+        <div class="auth-card">
+          <div class="auth-header">
+            <div class="hicon"><i class="bi bi-person-plus-fill"></i></div>
+            <div>
+              <h2>&#220;ye Ol</h2>
+              <p>Hemen kaydol, ilk kiralaman %10 indirimli!</p>
+            </div>
+          </div>
+          <div class="auth-body">
+            @if (TempData["ErrorMessage"] != null)
+            { <div class="alert alert-danger mb-3">@TempData["ErrorMessage"]</div> }
+
+            <form action="@Url.Action("Register","Account")" method="post">
+              @Html.AntiForgeryToken()
+              <div class="sec-label"><i class="bi bi-person"></i> Ki&#351;isel Bilgiler</div>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <div class="form-floating">
+                    <input type="text" name="firstName" class="form-control" id="firstName" placeholder="Ad" required />
+                    <label for="firstName">Ad</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-floating">
+                    <input type="text" name="lastName" class="form-control" id="lastName" placeholder="Soyad" required />
+                    <label for="lastName">Soyad</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sec-label"><i class="bi bi-envelope"></i> Hesap Bilgileri</div>
+              <div class="form-floating mb-3">
+                <input type="email" name="email" class="form-control" id="email" placeholder="email" required />
+                <label for="email">E-posta</label>
+              </div>
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <div class="form-floating">
+                    <input type="password" name="password" class="form-control" id="password" placeholder="sifre" required />
+                    <label for="password">&#350;ifre</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-floating">
+                    <input type="password" name="confirmPassword" class="form-control" id="confirmPassword" placeholder="tekrar" required />
+                    <label for="confirmPassword">&#350;ifre Tekrar</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="btn-unlock-wrap">
+                <button type="submit" class="btn-unlock" id="unlockBtn" title="Hesap Olu&#351;tur">
+                  <span class="lock-body">
+                    <span class="lock-icon-wrap">
+                      <svg class="lock-svg" width="32" height="36" viewBox="0 0 32 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- shackle (kilit kolu) -->
+                        <path class="lock-shackle" d="M10 17 V11 A6 6 0 0 1 22 11 V17"/>
+                        <!-- gövde -->
+                        <rect class="lock-body-rect" x="5" y="17" width="22" height="16" rx="3"/>
+                        <!-- delik -->
+                        <circle class="lock-hole" cx="16" cy="25" r="3"/>
+                        <!-- anahtar tırnak çizgisi -->
+                        <rect class="lock-hole" x="15" y="25" width="2" height="4" rx="1"/>
+                      </svg>
+                    </span>
+                    <span class="lock-text-wrap">
+                      <span class="lock-label-top">KAPI KİLİDİ</span>
+                      <span class="lock-label-main">HESAP OLUŞTUR</span>
+                    </span>
+                    <span class="lock-led"></span>
+                  </span>
+                </button>
+              </div>
+              <p class="hint-text">Zaten hesab&#305;n var m&#305;? <a href="@Url.Action("Login","Account")" class="auth-link">Giri&#351; Yap</a></p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+@section Scripts {
+<script>
+(function(){
+  var btn = document.getElementById('unlockBtn');
+  if(!btn) return;
+
+  var sndFail = new Audio('@Url.Content("~/Content/sounds/engine-fail.wav")');
+
+  var hasError     = document.querySelector('.alert-danger') !== null;
+  var hasSubmitted = sessionStorage.getItem('registerSubmitted');
+
+  if (hasSubmitted) {
+    sessionStorage.removeItem('registerSubmitted');
+    if (hasError) {
+      sndFail.play().catch(function(){});
+      btn.classList.add('error');
+      var lbl = btn.querySelector('.lock-label-main');
+      if(lbl) lbl.textContent = 'HATA!';
+    }
+  }
+
+  btn.closest('form').addEventListener('submit', function(e){
+    e.preventDefault();
+    btn.classList.add('loading');
+    var lbl = btn.querySelector('.lock-label-main');
+    if(lbl) lbl.textContent = 'AÇILIYOR...';
+    sessionStorage.setItem('registerSubmitted', '1');
+    sessionStorage.setItem('showUnlockOverlay', '1');
+    btn.closest('form').submit();
+  });
+})();
+</script>
+}

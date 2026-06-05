@@ -1,0 +1,41 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# NuGet packages (restore ile gelir)
+packages/
+*.nupkg
+!packages/repositories.config
+
+# Veritabanı dosyaları (hassas veri içerir)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+
+# App_Data içindeki DB (gitkeep hariç)
+/ArabamCarRental/App_Data/*.db
+
+# Yayın/dağıtım
+[Pp]ublish/
+PublishProfiles/
+*.pubxml
+*.pubxml.user
+
+# Roslyn derleyici önbelleği
+roslyn/
+
+# Geçici dosyalar
+*.tmp
+*.temp
+Thumbs.db
+.DS_Store

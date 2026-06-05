@@ -1,0 +1,251 @@
+@model IEnumerable<ArabamCarRental.Models.CarReview>
+
+@{
+    ViewBag.Title = "Yorum Yönetimi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var approved = Model.Where(r => r.IsApproved).ToList();
+    var hidden   = Model.Where(r => !r.IsApproved).ToList();
+}
+
+@section Styles {
+<style>
+:root { --fire:#d4500a; --amber:#f0a500; --black:#0a0a08; --white:#e8e0d0; --muted:rgba(232,224,208,0.5); }
+.admin-page { background:#0a0a08; min-height:calc(100vh - 120px); padding:2.5rem 0; }
+.page-topbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; }
+.page-topbar h2 { font-family:'Bebas Neue',sans-serif; font-size:2.2rem; letter-spacing:.04em; color:var(--white); margin:0; }
+.btn-back { background:rgba(212,80,10,0.12); border:1px solid rgba(212,80,10,0.25); color:var(--fire); font-size:.85rem; font-weight:600; padding:.5rem 1.1rem; border-radius:9px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:background .2s; }
+.btn-back:hover { background:rgba(212,80,10,0.22); color:var(--fire); }
+
+.stat-row { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2rem; }
+.stat-card { background:#1a1a12; border:1px solid rgba(212,80,10,0.15); border-radius:14px; padding:1rem 1.4rem; flex:1; min-width:130px; }
+.stat-card .sv { font-family:'Bebas Neue',sans-serif; font-size:1.9rem; color:var(--white); line-height:1; }
+.stat-card .sl { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
+.stat-card.green .sv { color:#34d399; }
+.stat-card.red .sv   { color:#f87171; }
+.stat-card.amber .sv { color:var(--amber); }
+
+.filter-bar { display:flex; gap:.8rem; flex-wrap:wrap; margin-bottom:1.5rem; align-items:center; }
+.search-input { background:#1a1a12; border:1px solid rgba(212,80,10,0.2); border-radius:9px; color:var(--white); font-size:.88rem; padding:.55rem .9rem .55rem 2.2rem; outline:none; transition:border-color .2s; min-width:240px; }
+.search-input:focus { border-color:var(--fire); }
+.search-wrap { position:relative; }
+.search-wrap i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--fire); font-size:.9rem; }
+.filter-select { background:#1a1a12; border:1px solid rgba(212,80,10,0.2); border-radius:9px; color:var(--white); font-size:.85rem; padding:.55rem .9rem; outline:none; cursor:pointer; }
+.filter-select option { background:#1a1a12; }
+
+.table-card { background:#1a1a12; border:1px solid rgba(212,80,10,0.15); border-radius:16px; overflow:hidden; }
+.review-table { width:100%; border-collapse:collapse; }
+.review-table thead tr { background:linear-gradient(90deg,#1f1410,#1a1a12); border-bottom:1px solid rgba(212,80,10,0.2); }
+.review-table thead th { padding:.85rem 1rem; font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--fire); font-weight:700; white-space:nowrap; }
+.review-table tbody tr { border-bottom:1px solid rgba(255,255,255,0.04); transition:background .15s; }
+.review-table tbody tr:last-child { border-bottom:none; }
+.review-table tbody tr:hover { background:rgba(212,80,10,0.04); }
+.review-table td { padding:.85rem 1rem; vertical-align:top; font-size:.87rem; color:var(--white); }
+
+.td-id { font-family:'Bebas Neue',sans-serif; font-size:1rem; color:rgba(232,224,208,0.35); white-space:nowrap; }
+.reviewer-info .rname { font-weight:600; }
+.reviewer-info .rcar  { font-size:.78rem; color:var(--muted); margin-top:2px; }
+.stars-cell i { color:var(--amber); font-size:.82rem; }
+.stars-cell i.bi-star { color:rgba(232,224,208,0.2); }
+.comment-cell { max-width:280px; font-size:.84rem; color:var(--muted); line-height:1.5; }
+.comment-cell .comment-text { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.review-photo-thumb { width:54px; height:40px; border-radius:6px; object-fit:cover; border:1px solid rgba(212,80,10,0.15); cursor:pointer; margin-top:4px; }
+.date-cell { font-size:.82rem; color:var(--muted); white-space:nowrap; }
+.status-dot { display:inline-flex; align-items:center; gap:5px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+.status-dot.approved { background:rgba(52,211,153,0.1); color:#34d399; border:1px solid rgba(52,211,153,0.25); }
+.status-dot.hidden   { background:rgba(248,113,113,0.1); color:#f87171; border:1px solid rgba(248,113,113,0.25); }
+
+.action-btns { display:flex; gap:6px; flex-wrap:wrap; }
+.btn-approve { background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); color:#34d399; font-size:.75rem; font-weight:700; padding:4px 12px; border-radius:7px; cursor:pointer; transition:background .2s; white-space:nowrap; }
+.btn-approve:hover { background:rgba(52,211,153,0.2); }
+.btn-hide    { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#f87171; font-size:.75rem; font-weight:700; padding:4px 12px; border-radius:7px; cursor:pointer; transition:background .2s; white-space:nowrap; }
+.btn-hide:hover    { background:rgba(248,113,113,0.2); }
+
+.no-results { text-align:center; padding:3rem; color:var(--muted); font-size:.9rem; }
+.no-results i { display:block; font-size:2.5rem; color:rgba(212,80,10,0.2); margin-bottom:.8rem; }
+
+/* Fotoğraf modal */
+#photoModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; }
+#photoModal.open { display:flex; }
+#photoModal img { max-width:90vw; max-height:85vh; border-radius:12px; object-fit:contain; border:2px solid rgba(212,80,10,0.3); }
+#photoModal .close-modal { position:absolute; top:20px; right:24px; font-size:2rem; color:var(--white); cursor:pointer; opacity:.6; }
+#photoModal .close-modal:hover { opacity:1; }
+
+@@media(max-width:768px){
+  .review-table thead th:nth-child(5),
+  .review-table tbody td:nth-child(5) { display:none; }
+}
+</style>
+}
+
+<div class="admin-page">
+  <div class="container-fluid px-4">
+
+    <div class="page-topbar">
+      <h2><i class="bi bi-chat-square-text me-2" style="color:var(--fire)"></i>Yorum Yönetimi</h2>
+      <a href="/Admin/Index" class="btn-back"><i class="bi bi-arrow-left"></i>Araç Listesine Dön</a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+      <div style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);border-radius:10px;padding:.8rem 1.2rem;color:#4ade80;font-size:.88rem;margin-bottom:1.5rem;">
+        <i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]
+      </div>
+    }
+
+    <!-- İstatistikler -->
+    <div class="stat-row">
+      <div class="stat-card amber">
+        <div class="sv">@Model.Count()</div>
+        <div class="sl">Toplam Yorum</div>
+      </div>
+      <div class="stat-card green">
+        <div class="sv">@approved.Count</div>
+        <div class="sl">Yayında</div>
+      </div>
+      <div class="stat-card red">
+        <div class="sv">@hidden.Count</div>
+        <div class="sl">Gizlenen</div>
+      </div>
+      <div class="stat-card">
+        <div class="sv">@(Model.Any() ? Model.Average(r => r.Rating).ToString("0.0") : "—")</div>
+        <div class="sl">Ort. Puan</div>
+      </div>
+    </div>
+
+    <!-- Filtre -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Müşteri veya araç ara…" />
+      </div>
+      <select class="filter-select" id="statusFilter">
+        <option value="all">Tüm Durumlar</option>
+        <option value="approved">Yayında</option>
+        <option value="hidden">Gizlenen</option>
+      </select>
+      <span style="font-size:.8rem;color:var(--muted);" id="resultCount">@Model.Count() yorum</span>
+    </div>
+
+    <!-- Tablo -->
+    <div class="table-card">
+      <div style="overflow-x:auto">
+        <table class="review-table" id="reviewTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Müşteri / Araç</th>
+              <th>Puan</th>
+              <th>Yorum</th>
+              <th>Tarih</th>
+              <th>Durum</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            @foreach (var r in Model)
+            {
+              var statusClass = r.IsApproved ? "approved" : "hidden";
+              var statusText  = r.IsApproved ? "Yayında"  : "Gizli";
+              <tr data-search="@((r.ReviewerName + " " + r.CarInfo).ToLower())" data-status="@statusClass">
+                <td class="td-id">#@r.ReviewID</td>
+                <td>
+                  <div class="reviewer-info">
+                    <div class="rname"><i class="bi bi-person-fill me-1" style="color:var(--fire);font-size:.8rem;"></i>@r.ReviewerName</div>
+                    <div class="rcar"><i class="bi bi-car-front-fill me-1"></i>@r.CarInfo</div>
+                  </div>
+                </td>
+                <td class="stars-cell">
+                  @for (int s = 1; s <= 5; s++) {
+                    <i class="bi bi-star@(s <= r.Rating ? "-fill" : "")"></i>
+                  }
+                  <div style="font-size:.75rem;color:var(--muted);margin-top:2px;">@r.Rating / 5</div>
+                </td>
+                <td class="comment-cell">
+                  <div class="comment-text">@r.Comment</div>
+                  @if (!string.IsNullOrEmpty(r.PhotoUrl))
+                  {
+                    <img src="@r.PhotoUrl" class="review-photo-thumb" alt="foto" onclick="openPhoto('@r.PhotoUrl')" title="Büyütmek için tıklayın" />
+                  }
+                </td>
+                <td class="date-cell">@r.ReviewDate.ToString("dd.MM.yyyy")<br/><span style="font-size:.75rem;">@r.ReviewDate.ToString("HH:mm")</span></td>
+                <td>
+                  <span class="status-dot @statusClass">
+                    <i class="bi bi-circle-fill" style="font-size:.5rem;"></i>@statusText
+                  </span>
+                </td>
+                <td>
+                  <div class="action-btns">
+                    @if (!r.IsApproved)
+                    {
+                      <form action="/Admin/ApproveReview" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@r.ReviewID" />
+                        <button type="submit" class="btn-approve"><i class="bi bi-check-lg me-1"></i>Onayla</button>
+                      </form>
+                    }
+                    @if (r.IsApproved)
+                    {
+                      <form action="/Admin/HideReview" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@r.ReviewID" />
+                        <button type="submit" class="btn-hide"><i class="bi bi-eye-slash me-1"></i>Gizle</button>
+                      </form>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        @if (!Model.Any())
+        {
+          <div class="no-results"><i class="bi bi-chat-square"></i>Henüz yorum yok.</div>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Fotoğraf Modal -->
+<div id="photoModal">
+  <span class="close-modal" onclick="closePhoto()">&times;</span>
+  <img id="modalImg" src="" alt="Yorum fotoğrafı" />
+</div>
+
+@section Scripts {
+<script>
+(function(){
+  var searchInput  = document.getElementById('searchInput');
+  var statusFilter = document.getElementById('statusFilter');
+  var rows         = document.querySelectorAll('#tableBody tr');
+  var resultCount  = document.getElementById('resultCount');
+
+  function applyFilter() {
+    var q = searchInput.value.toLowerCase().trim();
+    var st = statusFilter.value;
+    var visible = 0;
+    rows.forEach(function(row) {
+      var ms = !q || row.dataset.search.includes(q);
+      var mv = st === 'all' || row.dataset.status === st;
+      row.style.display = (ms && mv) ? '' : 'none';
+      if (ms && mv) visible++;
+    });
+    resultCount.textContent = visible + ' yorum';
+  }
+  searchInput.addEventListener('input', applyFilter);
+  statusFilter.addEventListener('change', applyFilter);
+})();
+
+function openPhoto(url) {
+  document.getElementById('modalImg').src = url;
+  document.getElementById('photoModal').classList.add('open');
+}
+function closePhoto() {
+  document.getElementById('photoModal').classList.remove('open');
+}
+document.getElementById('photoModal').addEventListener('click', function(e){
+  if (e.target === this) closePhoto();
+});
+</script>
+}

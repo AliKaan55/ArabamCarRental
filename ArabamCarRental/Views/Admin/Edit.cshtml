@@ -1,0 +1,287 @@
+@model ArabamCarRental.Models.Car
+
+@{
+    ViewBag.Title = "Araç Düzenle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)" />
+    <style>
+        :root {
+            --fire: #d4500a;
+            --amber: #f0a500;
+            --black: #0a0a08;
+            --white: #e8e0d0;
+            --muted: rgba(232,224,208,0.5);
+        }
+
+        body {
+            background: var(--black);
+        }
+
+        .admin-form-card {
+            max-width: 800px;
+            margin: 2.5rem auto;
+            background: #1a1a12;
+            border: 1px solid rgba(212,80,10,0.18);
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+
+        .admin-form-header {
+            background: linear-gradient(160deg, #111108 0%, #1a1a12 100%);
+            border-bottom: 2px solid var(--fire);
+            padding: 1.4rem 2rem;
+            color: #fff;
+        }
+
+            .admin-form-header h4 {
+                margin: 0;
+                font-family: 'Bebas Neue', sans-serif;
+                font-weight: 700;
+                font-size: 1.4rem;
+                letter-spacing: 0.05em;
+                color: var(--amber);
+            }
+
+        .admin-form-body {
+            padding: 2.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: .88rem;
+            color: var(--white);
+            margin-bottom: .4rem;
+        }
+
+        .form-control, .form-select {
+            background: #111108;
+            border: 1.5px solid rgba(212,80,10,0.2);
+            border-radius: 10px;
+            font-size: .92rem;
+            padding: .6rem .9rem;
+            color: var(--white);
+        }
+
+            .form-control:focus, .form-select:focus {
+                border-color: var(--fire);
+                box-shadow: 0 0 0 3px rgba(212,80,10,0.15);
+                background: #111108;
+                color: var(--white);
+            }
+
+        .form-check-input:checked {
+            background-color: var(--fire);
+            border-color: var(--fire);
+        }
+
+        .tech-section {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(212,80,10,0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tech-section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            color: var(--amber);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+        }
+
+        .img-upload-area {
+            border: 2px dashed rgba(212,80,10,0.3);
+            border-radius: 12px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            background: #111108;
+            position: relative;
+        }
+
+            .img-upload-area input[type=file] {
+                position: absolute;
+                inset: 0;
+                opacity: 0;
+                cursor: pointer;
+            }
+
+        .img-preview {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-top: 1.2rem;
+            border: 2px solid rgba(212,80,10,0.3);
+        }
+
+        .btn-save {
+            background: var(--fire);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: .75rem 2.2rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(212,80,10,0.2);
+        }
+
+            .btn-save:hover {
+                background: #b84008;
+                transform: translateY(-1px);
+            }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--muted);
+            border: 1.5px solid rgba(232,224,208,0.2);
+            border-radius: 10px;
+            padding: .75rem 1.8rem;
+            text-decoration: none;
+        }
+    </style>
+}
+
+<div class="container">
+    <div class="admin-form-card">
+        <div class="admin-form-header">
+            <h4><i class="fa-solid fa-pen-nib me-2"></i>CANAVARI GÜNCELLE — @Model.Brand @Model.Model</h4>
+        </div>
+        <div class="admin-form-body">
+            <form action="/Admin/Edit" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.CarID)
+                @Html.HiddenFor(m => m.ImageUrl)
+
+                <!-- PLAKA ÇAKIŞMA HATA KUTUSU (YENİ) -->
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger border-0 shadow-sm mb-4" style="background: rgba(239,68,68,0.1); color: #ef4444; border-radius: 10px; font-weight: 600; padding: 1rem;">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i> @ViewBag.Error
+                    </div>
+                }
+
+                <!-- Mevcut ham veriyi JS ile ayrıştırmak için gizli tutuyoruz -->
+                <input type="hidden" id="rawTechnicalSpecs" value="@Model.TechnicalSpecs" />
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label"><i class="fa-solid fa-copyright me-1" style="color:var(--amber);"></i> Marka</label>
+                        <input type="text" name="Brand" class="form-control" required value="@Model.Brand" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label"><i class="fa-solid fa-car-side me-1" style="color:var(--amber);"></i> Model</label>
+                        <input type="text" name="Model" class="form-control" required value="@Model.Model" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label"><i class="fa-solid fa-id-card me-1" style="color:var(--amber);"></i> Araç Plakası</label>
+                        <input type="text" name="LicensePlate" class="form-control" required value="@Model.LicensePlate" style="text-transform: uppercase;" />
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fa-solid fa-money-bill-wave me-1" style="color:var(--amber);"></i> Günlük Fiyat (₺)</label>
+                        <input type="number" step="0.01" name="DailyPrice" class="form-control" required value="@Model.DailyPrice.ToString().Replace(",", ".")" />
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end pb-2">
+                        <div class="form-check form-switch ms-1">
+                            <input class="form-check-input" type="checkbox" id="IsAvailable" name="IsAvailable" value="true" @(Model.IsAvailable ? "checked" : "") style="width:2.5em;height:1.3em; cursor:pointer;">
+                            <label class="form-check-label fw-semibold ms-2" for="IsAvailable" style="cursor:pointer;">Araç Müsait Mi?</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GELİŞMİŞ TEKNİK ÖZELLİKLER PANELİ -->
+                <div class="tech-section">
+                    <div class="tech-section-title"><i class="fa-solid fa-sliders me-2"></i>Araç Teknik Konfigürasyonu</div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Vites Tipi</label>
+                            <select id="techVites" name="TechVites" class="form-select" required>
+                                <option value="Manuel">Manuel</option>
+                                <option value="Otomatik">Otomatik</option>
+                                <option value="Yarı Otomatik">Yarı Otomatik</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Yakıt Tipi</label>
+                            <select id="techYakit" name="TechYakit" class="form-select" required>
+                                <option value="Benzin">Benzin</option>
+                                <option value="Dizel">Dizel</option>
+                                <option value="Hibrit">Hibrit</option>
+                                <option value="Elektrik">Elektrik</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Koltuk Sayısı</label>
+                            <input type="number" id="techKoltuk" name="TechKoltuk" class="form-control" required min="1" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Bagaj Hacmi</label>
+                            <input type="text" id="techBagaj" name="TechBagaj" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Kapı Sayısı</label>
+                            <input type="number" id="techKapi" name="TechKapi" class="form-control" required min="2" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label"><i class="fa-solid fa-image me-1" style="color:var(--amber);"></i> Araç Resmi</label>
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img id="imgPreview" class="img-preview mb-3" src="@Model.ImageUrl" alt="Mevcut Resim" style="display:block;" />
+                    }
+                    else
+                    {
+                        <img id="imgPreview" class="img-preview mb-3" src="" alt="Önizleme" />
+                    }
+                    <div class="img-upload-area" id="uploadArea">
+                        <input type="file" name="ImageFile" accept="image/*" id="imageInput" onchange="previewImage(this)" />
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--muted); display:block; margin-bottom:.5rem;"></i>
+                        <p style="color: var(--muted); margin:0;">Yeni görsel seçmek için tıklayın veya sürükleyin</p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn-save"><i class="fa-solid fa-check me-1"></i>Değişiklikleri Kaydet</button>
+                    <a href="/Admin/Index" class="btn-cancel">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Sayfa yüklendiğinde mevcut verileri parçala ve form alanlarına doldur
+        document.addEventListener("DOMContentLoaded", function () {
+            var rawData = document.getElementById("rawTechnicalSpecs").value;
+            if (rawData) {
+                var parts = rawData.split(',').map(item => item.trim());
+
+                if (parts[0]) document.getElementById("techVites").value = parts[0];
+                if (parts[1]) document.getElementById("techYakit").value = parts[1];
+                if (parts[2]) document.getElementById("techKoltuk").value = parts[2].replace(/[^0-9]/g, '');
+                if (parts[3]) document.getElementById("techBagaj").value = parts[3];
+                if (parts[4]) document.getElementById("techKapi").value = parts[4].replace(/[^0-9]/g, '');
+            }
+        });
+
+        function previewImage(input) {
+            var preview = document.getElementById('imgPreview');
+            var area = document.getElementById('uploadArea');
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) { preview.src = e.target.result; preview.style.display = 'block'; area.style.borderColor = '#d4500a'; };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}

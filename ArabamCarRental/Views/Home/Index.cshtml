@@ -1,0 +1,363 @@
+@{
+    ViewBag.Title = "ArabamRental - Premium Ara&#231; Kiralama";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+<style>
+:root { --fire:#d4500a; --amber:#f0a500; --black:#0a0a08; --white:#e8e0d0; --muted:rgba(232,224,208,0.55); }
+
+/* ── HERO ── */
+.hero {
+    position: relative;
+    height: 100vh;
+    min-height: 620px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    background: var(--black);
+}
+.hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.55;
+    filter: saturate(1.1) contrast(1.05);
+}
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        105deg,
+        rgba(10,10,8,0.93) 0%,
+        rgba(10,10,8,0.55) 55%,
+        rgba(10,10,8,0.15) 100%
+    );
+}
+/* Turuncu ateş parlaması - sağ alt */
+.hero-glow {
+    position: absolute;
+    bottom: -10%;
+    right: 5%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,80,10,0.22) 0%, transparent 65%);
+    pointer-events: none;
+}
+.hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 0 0 0 4vw;
+    max-width: 680px;
+}
+.hero-eyebrow {
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--fire);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.2s ease forwards;
+}
+.hero-eyebrow::before { content:''; display:inline-block; width:32px; height:2px; background:var(--fire); }
+.hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.8rem, 9.5vw, 8rem);
+    line-height: 0.9;
+    color: var(--white);
+    margin-bottom: 1.6rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s ease forwards;
+}
+.hero-title span { color: var(--fire); display: block; }
+.hero-title em   { color: var(--amber); font-style: normal; }
+.hero-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.75;
+    max-width: 430px;
+    margin-bottom: 2.4rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s ease forwards;
+}
+.hero-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s ease forwards;
+}
+.btn-fire {
+    background: var(--fire);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.04em;
+    padding: 0.88rem 2.1rem;
+    border-radius: 6px;
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .2s, transform .15s, box-shadow .2s;
+}
+.btn-fire:hover { background: #b84008; color: #fff; transform: translateY(-2px); box-shadow: 0 14px 36px rgba(212,80,10,0.45); }
+.btn-ghost {
+    background: transparent;
+    color: var(--white);
+    font-weight: 500;
+    font-size: 0.88rem;
+    padding: 0.88rem 1.8rem;
+    border-radius: 6px;
+    border: 1.5px solid rgba(232,224,208,0.2);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color .2s, background .2s;
+}
+.btn-ghost:hover { border-color: rgba(232,224,208,0.6); background: rgba(232,224,208,0.07); color: var(--white); }
+
+/* Stats bar */
+.hero-stats {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 3;
+    background: rgba(10,10,8,0.88);
+    border-top: 1px solid rgba(212,80,10,0.2);
+    padding: 1.3rem 0;
+    opacity: 0;
+    animation: fadeUp 0.8s 1s ease forwards;
+}
+.stat-item { text-align:center; padding:0 1rem; border-right:1px solid rgba(212,80,10,0.15); }
+.stat-item:last-child { border-right:none; }
+.stat-num { font-family:'Bebas Neue',sans-serif; font-size:2.2rem; color:var(--white); line-height:1; display:block; }
+.stat-num em { color:var(--fire); font-style:normal; }
+.stat-label { font-size:0.72rem; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-top:3px; display:block; }
+
+/* ── HOW IT WORKS ── */
+.section-how { background:#0e0e0b; padding:6rem 0 5rem; }
+.section-label { font-size:0.74rem; font-weight:700; letter-spacing:.24em; text-transform:uppercase; color:var(--fire); margin-bottom:.6rem; }
+.section-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.2rem,5vw,3.8rem); color:var(--white); line-height:1; margin-bottom:3.5rem; }
+.step-card {
+    position:relative;
+    padding:2.2rem 1.8rem 2rem;
+    border:1px solid rgba(212,80,10,0.15);
+    border-radius:12px;
+    background:rgba(26,26,18,0.6);
+    transition:box-shadow .25s, transform .25s, border-color .25s;
+}
+.step-card:hover { box-shadow:0 16px 48px rgba(212,80,10,0.15); transform:translateY(-4px); border-color:var(--fire); }
+.step-num { font-family:'Bebas Neue',sans-serif; font-size:4.5rem; color:rgba(212,80,10,0.08); line-height:1; position:absolute; top:1rem; right:1.4rem; }
+.step-icon { width:52px; height:52px; background:linear-gradient(135deg,var(--fire),#8a2a00); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; color:#fff; margin-bottom:1.3rem; }
+.step-title { font-weight:700; font-size:1.05rem; color:var(--white); margin-bottom:.6rem; }
+.step-desc  { font-size:0.87rem; color:var(--muted); line-height:1.65; }
+
+/* ── FEATURED CARS ── */
+.section-cars { background:#111108; padding:5.5rem 0; }
+.car-card { background:#1a1a12; border:1px solid rgba(212,80,10,0.12); border-radius:14px; overflow:hidden; transition:box-shadow .25s,transform .25s; height:100%; display:flex; flex-direction:column; }
+.car-card:hover { box-shadow:0 20px 56px rgba(212,80,10,0.18); transform:translateY(-5px); border-color:rgba(212,80,10,0.35); }
+.car-img-wrap { position:relative; height:200px; background:#0e0e0b; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+.car-img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform .4s ease; }
+.car-card:hover .car-img-wrap img { transform:scale(1.06); }
+.badge-avail { position:absolute; top:12px; left:12px; background:rgba(10,10,8,0.8); color:#4ade80; font-size:0.7rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid rgba(74,222,128,0.3); }
+.badge-avail.unavail { color:#f87171; border-color:rgba(248,113,113,0.3); }
+.car-body { padding:1.4rem 1.5rem 1.6rem; flex:1; display:flex; flex-direction:column; }
+.car-brand { font-size:0.7rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--fire); margin-bottom:3px; }
+.car-model { font-family:'Bebas Neue',sans-serif; font-size:1.55rem; color:var(--white); line-height:1; margin-bottom:.8rem; }
+.car-specs  { font-size:0.82rem; color:rgba(232,224,208,0.4); margin-bottom:1.2rem; flex:1; line-height:1.5; }
+.car-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto; border-top:1px solid rgba(212,80,10,0.1); padding-top:1rem; }
+.car-price  { font-family:'Bebas Neue',sans-serif; font-size:1.75rem; color:var(--white); line-height:1; }
+.car-price small { font-size:0.7rem; color:var(--muted); font-weight:400; display:block; }
+.btn-rent { background:rgba(212,80,10,0.15); color:var(--fire); border:1px solid rgba(212,80,10,0.3); font-weight:600; font-size:0.82rem; padding:.52rem 1.2rem; border-radius:8px; text-decoration:none; transition:background .2s, color .2s; white-space:nowrap; }
+.btn-rent:hover { background:var(--fire); color:#fff; border-color:var(--fire); }
+.btn-rent.disabled { background:rgba(255,255,255,0.05); color:rgba(232,224,208,0.25); pointer-events:none; border-color:transparent; }
+
+/* ── CTA ── */
+.section-cta { background:#0a0a08; padding:5rem 0; position:relative; overflow:hidden; border-top:1px solid rgba(212,80,10,0.12); }
+.section-cta::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 100% at 80% 50%, rgba(212,80,10,0.1) 0%, transparent 60%); }
+.cta-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.4rem,5vw,4rem); color:var(--white); line-height:1; margin-bottom:1rem; }
+.cta-sub   { color:var(--muted); font-size:1rem; margin-bottom:2rem; line-height:1.6; }
+
+/* Animations */
+@@keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+.reveal { opacity:0; transform:translateY(30px); transition:opacity .7s ease,transform .7s ease; }
+.reveal.visible { opacity:1; transform:none; }
+@@media(max-width:768px){ .hero-content{padding:0 1.5rem;} }
+</style>
+}
+
+<!-- HERO -->
+<section class="hero">
+    <video class="hero-video" autoplay muted loop playsinline>
+        <source src="~/Content/videos/hero.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>
+    <div class="hero-glow"></div>
+
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-eyebrow">Premium Ara&#231; Kiralama</div>
+            <h1 class="hero-title">
+                Yolun<br>
+                <span>Sahibi</span>
+                <em>Sen Ol.</em>
+            </h1>
+            <p class="hero-desc">
+                Y&#252;zlerce ara&#231; se&#231;ene&#287;i, uygun fiyatlar ve sorunsuz kiralama deneyimiyle
+                her yolculu&#287;unuz konforlu ba&#351;las&#305;n.
+            </p>
+            <div class="hero-actions">
+                <a href="@Url.Action("Index","Car")" class="btn-fire">
+                    <i class="bi bi-car-front-fill"></i> Ara&#231;lar&#305; &#304;ncele
+                </a>
+                @if (Session["UserId"] == null)
+                {
+                    <a href="@Url.Action("Register","Account")" class="btn-ghost">
+                        <i class="bi bi-person-plus"></i> &#220;cretsiz Kay&#305;t Ol
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-stats">
+        <div class="container">
+            <div class="row g-0">
+                <div class="col-3 stat-item"><span class="stat-num">500<em>+</em></span><span class="stat-label">Ara&#231;</span></div>
+                <div class="col-3 stat-item"><span class="stat-num">50<em>K</em></span><span class="stat-label">Mutlu M&#252;&#351;teri</span></div>
+                <div class="col-3 stat-item"><span class="stat-num">7<em>/24</em></span><span class="stat-label">Destek</span></div>
+                <div class="col-3 stat-item"><span class="stat-num">15<em>+</em></span><span class="stat-label">&#350;ehir</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section-how">
+    <div class="container">
+        <div class="reveal">
+            <p class="section-label">Nas&#305;l &#199;al&#305;&#351;&#305;r?</p>
+            <h2 class="section-title">3 Ad&#305;mda<br>Arabana Kavu&#351;</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4 reveal">
+                <div class="step-card">
+                    <span class="step-num">01</span>
+                    <div class="step-icon"><i class="bi bi-search"></i></div>
+                    <div class="step-title">Ara&#231; Se&#231;</div>
+                    <p class="step-desc">Filtrelerle b&#252;t&#231;ene ve ihtiyac&#305;na uygun arac&#305; saniyeler i&#231;inde bul.</p>
+                </div>
+            </div>
+            <div class="col-md-4 reveal">
+                <div class="step-card">
+                    <span class="step-num">02</span>
+                    <div class="step-icon"><i class="bi bi-calendar-check"></i></div>
+                    <div class="step-title">Tarih Belirle</div>
+                    <p class="step-desc">Kiralama ve teslim tarihlerini se&#231;, toplam &#252;cret an&#305;nda hesaplans&#305;n.</p>
+                </div>
+            </div>
+            <div class="col-md-4 reveal">
+                <div class="step-card">
+                    <span class="step-num">03</span>
+                    <div class="step-icon"><i class="bi bi-key-fill"></i></div>
+                    <div class="step-title">Anahtar&#305; Al</div>
+                    <p class="step-desc">Onay ald&#305;ktan sonra arac&#305; teslim al ve yola &#231;&#305;k!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED CARS -->
+@{
+    var featuredCars = ViewBag.FeaturedCars as List<ArabamCarRental.Models.Car>;
+}
+@if (featuredCars != null && featuredCars.Count > 0)
+{
+<section class="section-cars">
+    <div class="container">
+        <div class="reveal">
+            <p class="section-label">&#214;ne &#199;&#305;kan Ara&#231;lar</p>
+            <h2 class="section-title">Pop&#252;ler<br>Se&#231;imler</h2>
+        </div>
+        <div class="row g-4">
+            @foreach (var car in featuredCars)
+            {
+            <div class="col-lg-4 col-md-6 reveal">
+                <div class="car-card">
+                    <div class="car-img-wrap">
+                        @if (!string.IsNullOrEmpty(car.ImageUrl))
+                        { <img src="@car.ImageUrl" alt="@car.Brand @car.Model" /> }
+                        else
+                        { <i class="bi bi-car-front" style="font-size:4rem;color:rgba(212,80,10,0.2)"></i> }
+                        <span class="badge-avail @(!car.IsAvailable ? "unavail" : "")">
+                            @(car.IsAvailable ? "● Müsait" : "● Dolu")
+                        </span>
+                    </div>
+                    <div class="car-body">
+                        <div class="car-brand">@car.Brand</div>
+                        <div class="car-model">@car.Model</div>
+                        @if (!string.IsNullOrEmpty(car.TechnicalSpecs))
+                        { <div class="car-specs">@car.TechnicalSpecs</div> }
+                        <div class="car-footer">
+                            <div class="car-price">&#8378;@car.DailyPrice.ToString("N0")<small>/ g&#252;n</small></div>
+                            @if (car.IsAvailable)
+                            { <a href="@Url.Action("Rent","Car", new { id = car.CarID })" class="btn-rent">Kirala</a> }
+                            else
+                            { <span class="btn-rent disabled">Dolu</span> }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+        <div class="text-center mt-5 reveal">
+            <a href="@Url.Action("Index","Car")" class="btn-fire" style="display:inline-flex;">
+                T&#252;m Ara&#231;lar&#305; G&#246;r <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+}
+
+<!-- CTA -->
+@if (Session["UserId"] == null)
+{
+<section class="section-cta">
+    <div class="container position-relative">
+        <div class="row align-items-center">
+            <div class="col-lg-7 reveal">
+                <h2 class="cta-title">Hemen Hesap A&#231;,<br>&#304;lk Kiralaman %10 &#304;ndirimli</h2>
+                <p class="cta-sub">&#220;cretsiz &#252;yelikle ara&#231; kiralama deneyiminin keyfini &#231;&#305;kar.</p>
+                <a href="@Url.Action("Register","Account")" class="btn-fire">
+                    <i class="bi bi-person-plus-fill"></i> &#350;imdi Kaydol
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+}
+
+@section Scripts {
+<script>
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+            setTimeout(() => e.target.classList.add('visible'), i * 100);
+            observer.unobserve(e.target);
+        }
+    });
+}, { threshold: 0.12 });
+revealEls.forEach(el => observer.observe(el));
+</script>
+}

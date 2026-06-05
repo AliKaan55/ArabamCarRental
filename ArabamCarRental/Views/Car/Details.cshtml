@@ -1,0 +1,902 @@
+@model ArabamCarRental.Models.Car
+
+@{
+    ViewBag.Title = Model.Brand + " " + Model.Model + " Detay";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        :root {
+            --fire: #d4500a;
+            --amber: #f0a500;
+            --black: #0a0a08;
+            --white: #e8e0d0;
+            --muted: rgba(232,224,208,0.5);
+            --card-bg: rgba(26,26,18,0.9);
+            --card-border: rgba(212,80,10,0.2);
+        }
+
+        /* ── ÜST BAR ── */
+        .detail-topbar {
+            background: rgba(10,10,8,0.96);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            padding: .85rem 0;
+            position: sticky;
+            top: 56px;
+            z-index: 200;
+        }
+
+            .detail-topbar h1 {
+                font-family: 'Bebas Neue', sans-serif;
+                font-size: 1.6rem;
+                color: var(--white);
+                margin: 0;
+                line-height: 1;
+            }
+
+        .topbar-sub {
+            font-size: .8rem;
+            color: var(--muted);
+            margin-left: .5rem;
+        }
+
+        .btn-back {
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--muted);
+            border: 1.5px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: .42rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: border-color .2s, color .2s, background .2s;
+        }
+
+            .btn-back:hover {
+                border-color: var(--fire);
+                color: var(--white);
+                background: rgba(212,80,10,0.08);
+            }
+
+        /* ── HERO: ARAÇ RESMİ ── */
+        .car-hero {
+            background: radial-gradient(ellipse 90% 80% at 50% 55%, rgba(212,80,10,0.13) 0%, transparent 60%), radial-gradient(ellipse 60% 100% at 50% 100%, rgba(0,0,0,0.8) 0%, transparent 60%), linear-gradient(180deg, #141410 0%, #0a0a08 100%);
+            min-height: 440px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 3rem 1rem 2.5rem;
+        }
+            /* Izgara doku */
+            .car-hero::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-image: linear-gradient(rgba(212,80,10,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(212,80,10,0.04) 1px, transparent 1px);
+                background-size: 60px 60px;
+                mask-image: radial-gradient(ellipse 70% 80% at 50% 50%, black 30%, transparent 75%);
+                pointer-events: none;
+            }
+            /* Zemin gölgesi */
+            .car-hero::after {
+                content: '';
+                position: absolute;
+                bottom: 8%;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 50%;
+                height: 36px;
+                background: rgba(212,80,10,0.25);
+                filter: blur(30px);
+                border-radius: 50%;
+            }
+        /* Yan ateş parlamaları */
+        .hero-glow-left, .hero-glow-right {
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-glow-left {
+            left: -60px;
+            bottom: 0;
+            background: radial-gradient(circle, rgba(212,80,10,0.12) 0%, transparent 65%);
+        }
+
+        .hero-glow-right {
+            right: -60px;
+            top: 0;
+            background: radial-gradient(circle, rgba(240,165,0,0.08) 0%, transparent 65%);
+        }
+
+        .car-image-wrap {
+            position: relative;
+            z-index: 2;
+            width: 640px;
+            max-width: 90vw;
+        }
+
+            .car-image-wrap img {
+                width: 100%;
+                display: block;
+                filter: drop-shadow(0 20px 44px rgba(0,0,0,0.7)) drop-shadow(0 0 40px rgba(212,80,10,0.1));
+            }
+
+        .car-placeholder-hero {
+            width: 640px;
+            max-width: 90vw;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(232,224,208,0.12);
+            gap: 1rem;
+            z-index: 2;
+            position: relative;
+        }
+
+            .car-placeholder-hero i {
+                font-size: 6rem;
+            }
+
+            .car-placeholder-hero span {
+                font-size: .88rem;
+            }
+
+        /* ── DETAY GÖVDE ── */
+        .detail-body {
+            background: #0e0e0b;
+            padding: 3rem 0 4rem;
+        }
+
+        .car-name-row {
+            margin-bottom: 1.5rem;
+        }
+
+            .car-name-row .brand-tag {
+                font-size: .7rem;
+                font-weight: 700;
+                letter-spacing: .22em;
+                text-transform: uppercase;
+                color: var(--fire);
+                margin-bottom: 3px;
+            }
+
+            .car-name-row h2 {
+                font-family: 'Bebas Neue', sans-serif;
+                font-size: clamp(2rem, 4vw, 2.8rem);
+                color: var(--white);
+                line-height: 1;
+                margin: 0 0 .4rem;
+            }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .78rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+            .status-pill.avail {
+                background: rgba(34,197,94,0.1);
+                color: #4ade80;
+                border: 1px solid rgba(74,222,128,0.2);
+            }
+
+            .status-pill.unavail {
+                background: rgba(239,68,68,0.1);
+                color: #f87171;
+                border: 1px solid rgba(248,113,113,0.2);
+            }
+
+        /* Spec kutucukları */
+        .spec-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .spec-chip {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: .9rem 1.1rem;
+            min-width: 120px;
+            flex: 1;
+            text-align: center;
+            transition: box-shadow .2s, border-color .2s, transform .2s;
+        }
+
+            .spec-chip:hover {
+                box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(212,80,10,0.3);
+                border-color: rgba(212,80,10,0.35);
+                transform: translateY(-2px);
+            }
+
+        .chip-label {
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: block;
+            margin-bottom: .4rem;
+        }
+
+        .chip-icon {
+            font-size: 1.5rem;
+            color: var(--fire);
+            display: block;
+            margin-bottom: .3rem;
+        }
+
+        .chip-val {
+            font-size: .88rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        /* Teknik özellikler kartı */
+        .specs-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+            .specs-card h5 {
+                font-family: 'Bebas Neue', sans-serif;
+                font-size: 1.2rem;
+                letter-spacing: .04em;
+                color: var(--white);
+                margin-bottom: 1.2rem;
+            }
+
+        .specs-text {
+            font-size: .9rem;
+            color: var(--muted);
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+
+        /* Fiyat kartı */
+        .price-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.8rem;
+            position: sticky;
+            top: 104px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+
+        .price-label {
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: .3rem;
+        }
+
+        .price-num {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            color: var(--white);
+            line-height: 1;
+        }
+
+            .price-num small {
+                font-size: .72rem;
+                color: rgba(232,224,208,0.3);
+                font-family: 'DM Sans', sans-serif;
+                font-weight: 400;
+            }
+
+        .price-divider {
+            border-color: rgba(255,255,255,0.06);
+            margin: 1.2rem 0;
+        }
+
+        .btn-rent-big {
+            background: linear-gradient(135deg, var(--fire), #b84008);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 1rem;
+            font-weight: 700;
+            font-size: 1rem;
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            transition: transform .15s, box-shadow .2s, opacity .2s;
+        }
+
+            .btn-rent-big:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 28px rgba(212,80,10,.45);
+                color: #fff;
+                opacity: .95;
+            }
+
+        .unavail-badge {
+            background: rgba(239,68,68,0.08);
+            border: 1.5px solid rgba(239,68,68,0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            font-size: .88rem;
+            font-weight: 600;
+            color: #f87171;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: .8rem;
+            color: var(--muted);
+            padding: .4rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+            .meta-row:last-child {
+                border-bottom: none;
+            }
+
+            .meta-row span:last-child {
+                color: var(--white);
+                font-weight: 500;
+            }
+
+        /* ── YORUMLAR ── */
+        .reviews-section {
+            background: #0a0a08;
+            border-top: 1px solid var(--card-border);
+            padding: 3rem 0 4rem;
+        }
+
+        .section-eyebrow {
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: var(--fire);
+            margin-bottom: .4rem;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+            .section-eyebrow::before {
+                content: '';
+                display: inline-block;
+                width: 20px;
+                height: 2px;
+                background: var(--fire);
+            }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.9rem;
+            color: var(--white);
+            margin-bottom: 1.5rem;
+            letter-spacing: .04em;
+        }
+
+        .review-photo-upload {
+            margin-top: .4rem;
+        }
+
+        .photo-upload-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(212,80,10,0.06);
+            border: 1.5px dashed rgba(212,80,10,0.3);
+            border-radius: 10px;
+            padding: .7rem 1rem;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .85rem;
+            color: var(--muted);
+            transition: border-color .2s, background .2s;
+        }
+
+            .photo-upload-label:hover {
+                border-color: var(--fire);
+                background: rgba(212,80,10,0.1);
+                color: var(--white);
+            }
+
+            .photo-upload-label i {
+                font-size: 1.1rem;
+                color: var(--fire);
+            }
+
+        .review-form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+        }
+
+            .review-form-card h5 {
+                font-size: .95rem;
+                font-weight: 700;
+                color: var(--white);
+                margin-bottom: 1.2rem;
+            }
+
+        .star-rating {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 1rem;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+            .star-rating input {
+                display: none;
+            }
+
+            .star-rating label {
+                font-size: 1.6rem;
+                color: rgba(255,255,255,0.15);
+                cursor: pointer;
+                transition: color .15s;
+            }
+
+                .star-rating input:checked ~ label,
+                .star-rating label:hover,
+                .star-rating label:hover ~ label {
+                    color: var(--amber);
+                }
+
+        .review-textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1.5px solid rgba(255,255,255,0.09);
+            border-radius: 10px;
+            padding: .8rem 1rem;
+            color: var(--white);
+            font-size: .9rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color .2s;
+        }
+
+            .review-textarea::placeholder {
+                color: rgba(232,224,208,0.2);
+            }
+
+            .review-textarea:focus {
+                outline: none;
+                border-color: var(--fire);
+                box-shadow: 0 0 0 3px rgba(212,80,10,.12);
+            }
+
+        .review-label {
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: block;
+            margin-bottom: .4rem;
+            margin-top: .8rem;
+        }
+
+        .btn-submit-review {
+            background: linear-gradient(135deg, var(--fire), #b84008);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: .7rem 1.8rem;
+            font-weight: 700;
+            font-size: .9rem;
+            cursor: pointer;
+            transition: transform .15s, box-shadow .2s;
+            margin-top: .8rem;
+        }
+
+            .btn-submit-review:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 6px 18px rgba(212,80,10,.4);
+            }
+
+        .login-prompt-box {
+            background: rgba(212,80,10,0.05);
+            border: 1.5px dashed rgba(212,80,10,0.25);
+            border-radius: 14px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+            .login-prompt-box i {
+                font-size: 2.2rem;
+                color: rgba(212,80,10,0.3);
+                margin-bottom: .8rem;
+                display: block;
+            }
+
+            .login-prompt-box p {
+                color: var(--muted);
+                font-size: .9rem;
+                margin-bottom: 1rem;
+            }
+
+            .login-prompt-box a {
+                background: var(--fire);
+                color: #fff !important;
+                border-radius: 8px;
+                padding: .6rem 1.6rem;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: .88rem;
+                transition: background .2s, transform .15s;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                border: none;
+                line-height: 1;
+            }
+
+                .login-prompt-box a:hover {
+                    background: #b84008;
+                    color: #fff !important;
+                    transform: translateY(-1px);
+                }
+
+                .login-prompt-box a i {
+                    font-size: 1.1rem;
+                    line-height: 0;
+                    display: inline-block;
+                    color: #ffffff !important;
+                }
+
+        .review-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 1rem;
+            transition: border-color .2s;
+        }
+
+            .review-card:hover {
+                border-color: rgba(212,80,10,0.3);
+            }
+
+        .reviewer-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--fire), #b84008);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .88rem;
+            color: #fff;
+        }
+
+        .reviewer-name {
+            font-weight: 700;
+            font-size: .9rem;
+            color: var(--white);
+        }
+
+        .review-date {
+            font-size: .73rem;
+            color: var(--muted);
+        }
+
+        .review-stars {
+            color: var(--amber);
+            font-size: .92rem;
+        }
+
+        .review-text {
+            font-size: .88rem;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-top: .6rem;
+        }
+
+        .no-reviews {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: rgba(232,224,208,0.2);
+        }
+
+            .no-reviews i {
+                font-size: 2.5rem;
+                display: block;
+                margin-bottom: .5rem;
+            }
+
+        media (max-width: 768px) {
+            .car-hero
+
+        {
+            min-height: 280px;
+        }
+
+        .price-card {
+            position: static;
+            margin-top: 1.5rem;
+        }
+
+        .spec-chip {
+            min-width: 100px;
+        }
+        }
+    </style>
+}
+
+<!-- ÜST BAR -->
+<div class="detail-topbar">
+    <div class="container d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <h1>@Model.Brand @Model.Model</h1>
+            <span class="topbar-sub">ara&#231; detay&#305;</span>
+        </div>
+        <a href="/Car/Index" class="btn-back">
+            <i class="bi bi-arrow-left"></i> T&#252;m Ara&#231;lar
+        </a>
+    </div>
+</div>
+
+<!-- HERO -->
+<div class="car-hero">
+    <div class="hero-glow-left"></div>
+    <div class="hero-glow-right"></div>
+
+    @{
+        var detailImgUrl = ArabamCarRental.Services.CarService.GetCorrectImageUrl(Model.Brand, Model.Model, Model.ImageUrl);
+    }
+    @if (!string.IsNullOrEmpty(detailImgUrl))
+    {
+        <div class="car-image-wrap">
+            <img src="@detailImgUrl" alt="@Model.Brand @Model.Model"
+                 onerror="this.parentElement.innerHTML='<div class=\'car-placeholder-hero\'><i class=\'bi bi-car-front\'></i><span>Resim y\u00fcklenemedi</span></div>';" />
+        </div>
+    }
+    else
+    {
+        <div class="car-placeholder-hero">
+            <i class="bi bi-car-front"></i>
+            <span>Resim bulunmuyor</span>
+        </div>
+    }
+</div>
+
+<!-- DETAY GÖVDE -->
+<div class="detail-body">
+    <div class="container">
+
+        <div class="car-name-row">
+            <div class="brand-tag">@Model.Brand</div>
+            <h2>@Model.Model</h2>
+            <span class="status-pill @(Model.IsAvailable ? "avail" : "unavail")">
+                <i class="bi bi-circle-fill" style="font-size:.5rem;"></i>
+                @(Model.IsAvailable ? "Müsait" : "Kirada")
+            </span>
+        </div>
+
+        <!-- Spec kutucukları -->
+        <div class="spec-chips" id="specChips"></div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="specs-card">
+                    <h5><i class="bi bi-list-check me-2" style="color:var(--fire);"></i>Teknik &#214;zellikler</h5>
+                    <div class="specs-text">@(string.IsNullOrEmpty(Model.TechnicalSpecs) ? "Bu ara&#231; i&#231;in teknik &#246;zellik bilgisi girilmemi&#351;tir." : Model.TechnicalSpecs)</div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="price-card">
+                    <div class="price-label">G&#252;nl&#252;k Kiralama</div>
+                    <div class="price-num">
+                        &#8378;@Model.DailyPrice.ToString("N0")
+                        <small> / g&#252;n</small>
+                    </div>
+                    <hr class="price-divider" />
+
+                    @if (Model.IsAvailable)
+                    {
+                        <a href="/Car/Rent/@Model.CarID" class="btn-rent-big">
+                            <i class="bi bi-key-fill me-2"></i>Hemen Kirala
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="unavail-badge">
+                            <i class="bi bi-x-circle me-1"></i>Bu ara&#231; &#351;u an kirada
+                        </div>
+                    }
+
+                    <div style="margin-top:1.2rem;">
+                        <div class="meta-row"><span>Ara&#231; ID</span><span>#@Model.CarID</span></div>
+                        <div class="meta-row">
+                            <span>Durum</span>
+                            <span style="color:@(Model.IsAvailable ? "#4ade80" : "#f87171");">
+                                @(Model.IsAvailable ? "Müsait" : "Kirada")
+                            </span>
+                        </div>
+                        <div class="meta-row"><span>Marka</span><span>@Model.Brand</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- YORUMLAR -->
+<div class="reviews-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="section-eyebrow">De&#287;erlendirmeler</div>
+                <p class="section-title"><i class="bi bi-chat-square-text me-2"></i>Kullan&#305;c&#305; Yorumlar&#305;</p>
+
+                @if ((bool)(ViewBag.IsLoggedIn ?? false))
+                {
+                    <div class="review-form-card">
+                        <h5><i class="bi bi-pencil-square me-2" style="color:var(--fire);"></i>Yorumunuzu Yaz&#305;n</h5>
+                        @if (TempData["ReviewSuccess"] != null)
+                        {
+                            <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:.8rem 1rem;color:#4ade80;font-size:.88rem;margin-bottom:1rem;">
+                                <i class="bi bi-check-circle me-2"></i>@TempData["ReviewSuccess"]
+                            </div>
+                        }
+                        @using (Html.BeginForm("AddReview", "Car", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="CarId" value="@Model.CarID" />
+                            <span class="review-label">Puan&#305;n&#305;z</span>
+                            <div class="star-rating">
+                                <input type="radio" id="star5" name="Rating" value="5" />
+                                <label for="star5">&#9733;</label>
+                                <input type="radio" id="star4" name="Rating" value="4" />
+                                <label for="star4">&#9733;</label>
+                                <input type="radio" id="star3" name="Rating" value="3" checked />
+                                <label for="star3">&#9733;</label>
+                                <input type="radio" id="star2" name="Rating" value="2" />
+                                <label for="star2">&#9733;</label>
+                                <input type="radio" id="star1" name="Rating" value="1" />
+                                <label for="star1">&#9733;</label>
+                            </div>
+                            <span class="review-label">Yorumunuz</span>
+                            <textarea name="Comment" class="review-textarea" placeholder="Bu ara&#231; hakk&#305;nda deneyiminizi payla&#351;&#305;n..." required maxlength="500"></textarea>
+                            <div style="font-size:.73rem;color:rgba(232,224,208,0.2);text-align:right;margin-top:3px;">Maks. 500 karakter</div>
+                            <span class="review-label" style="margin-top:.8rem;display:block;">Foto&#287;raf Ekle <span style="color:var(--muted);font-size:.75rem;">(iste&#287;e ba&#287;l&#305;)</span></span>
+                            <div class="review-photo-upload">
+                                <label for="ReviewPhoto" class="photo-upload-label">
+                                    <i class="bi bi-camera"></i>
+                                    <span id="photoLabelText">Foto&#287;raf se&#231; (jpg, png, webp)</span>
+                                </label>
+                                <input type="file" name="ReviewPhoto" id="ReviewPhoto" accept=".jpg,.jpeg,.png,.webp" style="display:none;" onchange="previewPhoto(this)" />
+                                <img id="photoPreview" src="" alt="&#214;nizleme" style="display:none;max-height:160px;border-radius:8px;margin-top:.6rem;object-fit:cover;border:1px solid rgba(212,80,10,0.2);width:100%;" />
+                            </div>
+                            <button type="submit" class="btn-submit-review">
+                                <i class="bi bi-send me-2"></i>Yorumu G&#246;nder
+                            </button>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="login-prompt-box">
+                        <i class="bi bi-lock"></i>
+                        <p>Yorum yapabilmek i&#231;in hesab&#305;n&#305;za <strong>giri&#351; yapman&#305;z</strong> gerekmektedir.</p>
+                        <a href="@Url.Action("Login","Account")"><i class="bi bi-box-arrow-in-right me-1"></i>Giri&#351; Yap</a>
+                    </div>
+                }
+
+                <!-- MEVCUT YORUMLAR -->
+                @{
+                    var reviews = ViewBag.Reviews as List<ArabamCarRental.Models.CarReview>;
+                }
+                @if (reviews != null && reviews.Count > 0)
+                {
+                    foreach (var review in reviews)
+                    {
+                        <div class="review-card">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="reviewer-avatar">@review.ReviewerInitials</div>
+                                    <div>
+                                        <div class="reviewer-name">@review.ReviewerName</div>
+                                        <div class="review-date">@review.ReviewDate.ToString("dd MMM yyyy")</div>
+                                    </div>
+                                </div>
+                                <div class="review-stars">
+                                    @for (int s = 1; s <= 5; s++)
+                                    {
+                                        <i class="bi bi-star@(s <= review.Rating ? "-fill" : "")"></i>
+                                    }
+                                </div>
+                            </div>
+                            <div class="review-text">@review.Comment</div>
+                            @if (!string.IsNullOrEmpty(review.PhotoUrl))
+                            {
+                                <div style="margin-top:.8rem;">
+                                    <img src="@review.PhotoUrl" alt="Yorum foto&#287;raf&#305;" style="max-height:220px;border-radius:10px;object-fit:cover;border:1px solid rgba(212,80,10,0.2);max-width:100%;cursor:pointer;" onclick="window.open(this.src,'_blank')" />
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="no-reviews">
+                        <i class="bi bi-chat-square"></i>
+                        <p>Hen&#252;z yorum yap&#305;lmam&#305;&#351;. &#304;lk yorumu siz yap&#305;n!</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+// ── FOTOĞRAF ÖNİZLEME ──
+function previewPhoto(input) {
+    var preview = document.getElementById('photoPreview');
+    var label   = document.getElementById('photoLabelText');
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+        label.textContent = input.files[0].name;
+    }
+}
+
+// ── SPEC CHİPLERİ ──
+(function() {
+    var specs = "@Html.Raw(Model.TechnicalSpecs ?? "")".toLowerCase();
+    var chips = [];
+    if (specs.indexOf('otomatik') > -1)       chips.push({icon:'bi-sliders2',              label:'Vites',           val:'Otomatik'});
+    else if (specs.indexOf('manuel') > -1)     chips.push({icon:'bi-sliders2',              label:'Vites',           val:'Manuel'});
+    if (specs.indexOf('elektrik') > -1)        chips.push({icon:'bi-lightning-charge-fill', label:'Yak&#305;t',     val:'Elektrik'});
+    else if (specs.indexOf('hibrit') > -1)     chips.push({icon:'bi-ev-station-fill',       label:'Yak&#305;t',     val:'Hibrit'});
+    else if (specs.indexOf('dizel') > -1)      chips.push({icon:'bi-fuel-pump-fill',        label:'Yak&#305;t',     val:'Dizel'});
+    else if (specs.indexOf('benzin') > -1)     chips.push({icon:'bi-fuel-pump-fill',        label:'Yak&#305;t',     val:'Benzin'});
+    var seatM  = specs.match(/(\d+)\s*koltuk/); if (seatM)  chips.push({icon:'bi-person-fill',    label:'Koltuk',          val:seatM[1]+' Ki&#351;i'});
+    var bagM   = specs.match(/(\d+)\s*(lt|litre)/); if (bagM) chips.push({icon:'bi-briefcase-fill', label:'Bagaj',          val:bagM[1]+' lt'});
+    var doorM  = specs.match(/(\d+)\s*kap[ıi]/);   if (doorM) chips.push({icon:'bi-door-open-fill', label:'Kap&#305;',     val:doorM[1]+' Adet'});
+    var hpM    = specs.match(/(\d+)\s*(hp|bg|beygir)/); if (hpM) chips.push({icon:'bi-speedometer', label:'G&#252;&#231;', val:hpM[1]+' HP'});
+    var kmM    = specs.match(/(\d+)\s*km/);   if (kmM)   chips.push({icon:'bi-speedometer2',        label:'G&#252;nl&#252;k Limit', val:kmM[1]+' km'});
+    var container = document.getElementById('specChips');
+    if (!chips.length) { container.style.display='none'; return; }
+    chips.forEach(function(c) {
+        container.innerHTML += '<div class="spec-chip"><span class="chip-label">'+c.label+'</span><i class="bi '+c.icon+' chip-icon"></i><span class="chip-val">'+c.val+'</span></div>';
+    });
+})();
+    </script>
+}
