@@ -1,4 +1,4 @@
-# 🚗 ArabamRental
+#  ArabamRental
 
 <div align="center">
 
@@ -13,7 +13,7 @@
 
 ---
 
-## 📸 Ekran Görüntüleri
+##  Ekran Görüntüleri
 
 ### Ana Sayfa
 ![Ana Sayfa](https://github.com/user-attachments/assets/6383fe36-ea4d-48da-a745-1e3aaa4f2e0d)
@@ -41,18 +41,18 @@
 
 ---
 
-## ✨ Özellikler
+##  Özellikler
 
-- 🔐 **Kullanıcı Sistemi** — Kayıt, giriş, şifre sıfırlama (token tabanlı), beni hatırla
-- 🚘 **Araç Yönetimi** — Filtreleme (vites, yakıt, marka), detay sayfası, görsel yükleme
-- 📅 **Kiralama Akışı** — Tarih seçimi, otomatik fiyat hesaplama, iptal desteği
-- ⭐ **Yorum Sistemi** — Puanlama, yorum yazma, admin onayı
-- 🛡️ **Admin Paneli** — Araç/müşteri/kiralama/yorum yönetimi
-- 🔒 **Güvenlik** — SHA-256 şifre hashleme, CSRF koruması, parametreli sorgular
+-  **Kullanıcı Sistemi** — Kayıt, giriş, şifre sıfırlama (token tabanlı), beni hatırla
+-  **Araç Yönetimi** — Filtreleme (vites, yakıt, marka), detay sayfası, görsel yükleme
+-  **Kiralama Akışı** — Tarih seçimi, otomatik fiyat hesaplama, iptal desteği
+-  **Yorum Sistemi** — Puanlama, yorum yazma, admin onayı
+-  **Admin Paneli** — Araç/müşteri/kiralama/yorum yönetimi
+-  **Güvenlik** — SHA-256 şifre hashleme, CSRF koruması, parametreli sorgular
 
 ---
 
-## 🛠️ Teknolojiler
+##  Teknolojiler
 
 | Katman | Teknoloji |
 |--------|-----------|
@@ -64,7 +64,7 @@
 
 ---
 
-## 🚀 Kurulum
+##  Kurulum
 
 ### Gereksinimler
 - Visual Studio 2019 veya üzeri
@@ -86,7 +86,7 @@ git clone https://github.com/KULLANICI_ADINIZ/ArabamCarRental.git
 
 ---
 
-## ⚙️ Yapılandırma
+##  Yapılandırma
 
 `Web.config` dosyasında admin giriş bilgilerini değiştirin:
 
@@ -126,7 +126,7 @@ ArabamCarRental/
 
 ---
 
-## 🔒 Güvenlik
+##  Güvenlik
 
 - Kullanıcı şifreleri **SHA-256** ile hashlenerek saklanır
 - Tüm formlar **AntiForgeryToken** ile korunur
@@ -136,7 +136,7 @@ ArabamCarRental/
 
 ---
 
-## 📄 Lisans
+##  Lisans
 
 Bu proje MIT lisansı altında dağıtılmaktadır.
 
